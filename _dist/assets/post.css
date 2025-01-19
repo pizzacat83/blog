@@ -1,0 +1,40 @@
+article {
+    max-width: 40rem; /* One line contains 80 characters, you know? */
+
+    margin: 0 auto;
+    padding: 0 3rem;
+
+    p, ul, ol, pre {
+        margin-bottom: 1em;
+    }
+
+    & > header {
+        time {
+            font-size: 0.9rem;
+            color: var(--dark-gray);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--dark-gray-heading);
+
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+    }
+    
+    h2, h3, h4, h5, h6 {
+        color: var(--dark-gray-heading);
+    }
+    
+    h2 {
+        padding-bottom: 0.1rem;
+        border-bottom: 1px solid var(--light-gray);
+        margin-bottom: 1rem;
+    }
+    
+    h3, h4, h5, h6 {
+        margin-bottom: 0.5rem;
+    }
+    
+}
