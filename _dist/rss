@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <title>pizzacat83's blog</title>
+        <link>https://blog.pizzacat83.com</link>
+        <description></description>
+        <language>en-us</language>
+        <item>
+            <title>Post Title 1</title>
+            <link>https://blog.pizzacat83.com/posts/2022-05-21-firestore-security-rule-debug-helper</link>
+            <description>Firestore security rules provide a function debug, which logs the given value to the log file. But it just prints the value, with no information on its context. What if there's a function to log custom messages that explain why the request is denied?</description>
+            <pubDate>Sat, 21 May 2022</pubDate>
+        </item>
+    </channel>
+</rss>
