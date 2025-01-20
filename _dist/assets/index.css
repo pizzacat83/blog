@@ -1,6 +1,7 @@
 .post-list {
     max-width: 40rem;
     margin: 0 auto;
+    padding: 0 3rem;
 
     article {
         &:not(:first-child) {
@@ -9,6 +10,24 @@
         border-bottom: 1px solid var(--light-gray);
         padding-bottom: 1rem;
 
+        time {
+            font-size: 0.75rem;
+        }
+
+        .badge-external-post {
+            display: inline-block;
+            background-color: var(--lighter-gray);
+            
+            padding: 0.1rem 0.5rem;
+            border-radius: 0.25rem;
+
+            color: var(--dim-gray);
+            font-size: .75rem;
+
+            margin-left: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+    
         h1 {
             font-size: 1.5rem;
             font-weight: 600;
@@ -17,8 +36,14 @@
 
             a {
                 color: var(--dark-gray-heading);
+
+                .fa-arrow-up-right-from-square {
+                    font-size: 1rem;
+                    margin-left: 0.25rem;
+                }
             }
         }
+
 
         .post-summary {
             font-size: 0.75rem;
