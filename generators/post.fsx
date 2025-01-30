@@ -1,7 +1,7 @@
 #r "../_lib/Fornax.Core.dll"
 #load "lib.fsx"
 
-type RawHtml = RawHtml of string
+open Lib
 
 let websocketScript =
     RawHtml """
@@ -24,35 +24,7 @@ let websocketScript =
 
 
 let layout (post: Postloader.Post) =
-    $"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{post.title}</title>
-
-<link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/post.css">
-
-<link rel="alternate" type="application/rss+xml" title="posts" href="/rss">
-
-{websocketScript |> (fun (RawHtml x) -> x)}
-</head>
-<body>
-
-<header>
-<nav>
-    <div class="blog-title">
-        <a href="/">pizzacat83's blog</a>
-    </div>
-    <div>
-        <a href="https://pizzacat83.com">About</a>
-    </div>
-</nav>
-</header>
-<main>
-
+    Lib.layout  post.title $"""
 <article>
 
 <header>
@@ -62,17 +34,7 @@ let layout (post: Postloader.Post) =
 </h1>
 </header>
     {post.content}
-
 </article>
-
-</main>
-
-<footer>
-   <p>© 2025 pizzacat83 • <a href="/rss">Feed</a></p>
-</footer>
-
-</body>
-</html>
     """
 
 let generate (ctx : SiteContents) (projectRoot: string) (postKey: string) =

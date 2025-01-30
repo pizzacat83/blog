@@ -2,4 +2,4 @@
 #load "lib.fsx"
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
-    "hello"
+    Lib.layout "pizzacat83's blog" "hello"
