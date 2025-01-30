@@ -1,7 +1,5 @@
 #r "../_lib/Fornax.Core.dll"
-#if !FORNAX
-#load "../loaders/postloader.fsx"
-#endif
+#load "lib.fsx"
 
 type RawHtml = RawHtml of string
 
