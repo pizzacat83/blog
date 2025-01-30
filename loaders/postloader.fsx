@@ -8,6 +8,7 @@ type PostKey = PostKey of string
 
 type Post = {
     key: PostKey
+    title: string
     content: string
 }
 
@@ -21,6 +22,28 @@ let markdownPipeline =
         .UsePipeTables()
         .UseGridTables()
         .Build()
+
+type PostSource = {
+    title: string
+    body: string
+}
+
+let splitMarkdown (markdown: string): PostSource  =
+    let title = 
+        markdown.Split('\n')
+        |> Array.tryFind (fun x -> x.StartsWith("# "))
+        |> Option.map (fun x -> x.Substring(2))
+        |> Option.defaultValue "No title"
+
+    let body =
+        markdown.Split('\n')
+        |> Array.filter (fun x -> not (x.StartsWith("# ")))
+        |> String.concat "\n"
+
+    {
+        title = title
+        body = body
+    }
 
 let renderMarkdown (markdown: string) =
     Markdown.ToHtml(markdown, markdownPipeline)
@@ -41,9 +64,12 @@ let loadFile (projectRoot: string) (abspath: string): Post =
 
     let relpath = Path.Combine(dirPart, (abspath |> Path.GetFileNameWithoutExtension) + ".md").Replace("\\", "/")
 
+    let source = splitMarkdown markdown
+
     {
         key = PostKey relpath
-        content = renderMarkdown markdown
+        title = source.title
+        content = renderMarkdown source.body
     }
 
 let loader (projectRoot: string) (siteContent: SiteContents) =

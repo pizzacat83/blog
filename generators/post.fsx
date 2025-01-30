@@ -25,14 +25,14 @@ let websocketScript =
     """
 
 
-let layout (content: RawHtml) =
+let layout (post: Postloader.Post) =
     $"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A Useful Custom Function to Debug Firestore Security Rules</title>
+<title>{post.title}</title>
 
 <link rel="stylesheet" href="/assets/style.css">
 <link rel="stylesheet" href="/assets/post.css">
@@ -59,10 +59,11 @@ let layout (content: RawHtml) =
 
 <header>
 <time datetime="2022-05-21">2022-05-21</time>
-<h1 id="a-useful-custom-function-to-debug-firestore-security-rules">A
-Useful Custom Function to Debug Firestore Security Rules</h1>
+<h1>
+    {post.title}
+</h1>
 </header>
-    {content |> (fun (RawHtml x) -> x)}
+    {post.content}
 
 </article>
 
@@ -84,4 +85,4 @@ let generate (ctx : SiteContents) (projectRoot: string) (postKey: string) =
         |> Option.defaultValue Seq.empty
         |> Seq.find (fun n -> n.key = postKey)
 
-    layout (RawHtml post.content)
+    layout post
