@@ -69,7 +69,7 @@ Useful Custom Function to Debug Firestore Security Rules</h1>
 </main>
 
 <footer>
-   <p>© 2025 pizzacat83 • <a href="/rss">Feed</a> • Built with <a href="https://github.com/pizzacat83/blog/tree/main/generator">purress 🐈</a></p>
+   <p>© 2025 pizzacat83 • <a href="/rss">Feed</a></p>
 </footer>
 
 </body>
