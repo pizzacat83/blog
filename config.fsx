@@ -4,14 +4,10 @@ open Config
 open System.IO
 
 let postPredicate (projectRoot: string, page: string) =
+    // TODO: list files under posts/
     let fileName = Path.Combine(projectRoot,page)
     let ext = Path.GetExtension page
-    if ext = ".md" then
-        let ctn = File.ReadAllText fileName
-        page.Contains("_public") |> not
-        && ctn.Contains("layout: post")
-    else
-        false
+    ext = ".md"
 
 let staticPredicate (projectRoot: string, page: string) =
     let ext = Path.GetExtension page
@@ -32,12 +28,13 @@ let staticPredicate (projectRoot: string, page: string) =
 
 let config = {
     Generators = [
-        {Script = "less.fsx"; Trigger = OnFileExt ".less"; OutputFile = ChangeExtension "css" }
-        {Script = "sass.fsx"; Trigger = OnFileExt ".scss"; OutputFile = ChangeExtension "css" }
+        // {Script = "less.fsx"; Trigger = OnFileExt ".less"; OutputFile = ChangeExtension "css" }
+        // {Script = "sass.fsx"; Trigger = OnFileExt ".scss"; OutputFile = ChangeExtension "css" }
+        // {Script = "post.fsx"; Trigger = OnFilePredicate postPredicate; OutputFile = ChangeExtension "html" }
         {Script = "post.fsx"; Trigger = OnFilePredicate postPredicate; OutputFile = ChangeExtension "html" }
-        {Script = "staticfile.fsx"; Trigger = OnFilePredicate staticPredicate; OutputFile = SameFileName }
-        {Script = "index.fsx"; Trigger = Once; OutputFile = MultipleFiles id }
-        {Script = "about.fsx"; Trigger = Once; OutputFile = NewFileName "about.html" }
-        {Script = "contact.fsx"; Trigger = Once; OutputFile = NewFileName "contact.html" }
+        // {Script = "staticfile.fsx"; Trigger = OnFilePredicate staticPredicate; OutputFile = SameFileName }
+        // {Script = "index.fsx"; Trigger = Once; OutputFile = MultipleFiles id }
+        // {Script = "about.fsx"; Trigger = Once; OutputFile = NewFileName "about.html" }
+        // {Script = "contact.fsx"; Trigger = Once; OutputFile = NewFileName "contact.html" }
     ]
 }
