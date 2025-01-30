@@ -15,10 +15,20 @@ type PostConfig = {
     disableLiveRefresh: bool
 }
 
+
+let markdownPipeline =
+    MarkdownPipelineBuilder()
+        .UsePipeTables()
+        .UseGridTables()
+        .Build()
+
+let renderMarkdown (markdown: string) =
+    Markdown.ToHtml(markdown, markdownPipeline)
+
 let contentDir = "posts"
 
 let loadFile (projectRoot: string) (abspath: string): Post =
-    let text = File.ReadAllText abspath
+    let markdown = File.ReadAllText abspath
 
     let chopLength =
         if projectRoot.EndsWith(Path.DirectorySeparatorChar) then projectRoot.Length
@@ -33,7 +43,7 @@ let loadFile (projectRoot: string) (abspath: string): Post =
 
     {
         key = PostKey relpath
-        content = text
+        content = renderMarkdown markdown
     }
 
 let loader (projectRoot: string) (siteContent: SiteContents) =
