@@ -1,7 +1,7 @@
 #r "../_lib/Fornax.Core.dll"
 #r "../_lib/Markdig.dll"
-#r "nuget: YamlDotNet, 16.3.0"
-#r "nuget: FsToolkit.ErrorHandling, 4.18.0"
+#r "../packages/YamlDotNet/lib/netstandard2.0/YamlDotNet.dll"
+#r "../packages/FsToolkit.ErrorHandling/lib/netstandard2.0/FsToolkit.ErrorHandling.dll"
 
 open System.IO
 open Markdig
