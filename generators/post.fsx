@@ -39,8 +39,13 @@ let layout (post: Postloader.Post) =
 </article>
     """ ["/assets/post.css"]
 
-let generate' (ctx : SiteContents) (projectRoot: string) (postKey: string): Result<string, string> = 
-    let postKey = Postloader.PostKey postKey
+let generate' (ctx : SiteContents) (projectRoot: string) (relpath: string): Result<string, string> = 
+
+    let postKey =
+        relpath
+        |> System.IO.Path.GetDirectoryName
+        |> System.IO.Path.GetFileName
+        |> Postloader.PostKey
 
     let post =
         ctx.TryGetValues<Postloader.Post> ()

@@ -3,7 +3,7 @@
 
 let renderPost (post: Postloader.Post) =
     let published = post.published.ToString("yyyy-MM-dd")
-    let href = $"/{post.key |> (fun (Postloader.PostKey x) -> x)}"
+    let href = $"/posts/{post.key |> (fun (Postloader.PostKey x) -> x)}"
 
     $"""
     <article>

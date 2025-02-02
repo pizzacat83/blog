@@ -101,7 +101,11 @@ let loadFile (projectRoot: string) (abspath: string): Result<Post, string> =
         |> Path.GetDirectoryName
         |> fun x -> x.[chopLength .. ]
 
-    let relpath: string = Path.Combine(dirPart, (abspath |> Path.GetFileNameWithoutExtension) + ".md").Replace("\\", "/")
+    let key =
+        abspath
+        |> Path.GetDirectoryName
+        |> Path.GetFileName
+        |> PostKey
 
     let source = splitMarkdown markdown
 
@@ -113,7 +117,7 @@ let loadFile (projectRoot: string) (abspath: string): Result<Post, string> =
     result {
         let! fm = frontmatter
         return! Ok {
-            key = PostKey relpath
+            key = key
             title = source.title
             published = fm.published
             summary = fm.summary
