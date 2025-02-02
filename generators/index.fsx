@@ -11,7 +11,7 @@ let renderPost (post: Postloader.Post) =
         <h1><a href="{href}">{post.title}</a></h1>
         
         <p class="post-summary">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam totam recusandae quas iusto natus cupiditate debitis enim consequuntur placeat veritatis fuga minus quos eos libero pariatur fugiat laudantium, repellat quia!
+            {post.summary}
         </p>
     </article>
     """
