@@ -18,6 +18,7 @@ let config = {
         {Script = "post.fsx"; Trigger = OnFilePredicate postPredicate; OutputFile = ChangeExtension "html" }
         {Script = "asset.fsx"; Trigger = OnFilePredicate assetsPredicate; OutputFile = SameFileName }
         {Script = "index.fsx"; Trigger = Once; OutputFile = NewFileName "index.html" }
+        {Script = "rss.fsx"; Trigger = Once; OutputFile = NewFileName "rss.xml" }
         // {Script = "about.fsx"; Trigger = Once; OutputFile = NewFileName "about.html" }
         // {Script = "contact.fsx"; Trigger = Once; OutputFile = NewFileName "contact.html" }
     ]
