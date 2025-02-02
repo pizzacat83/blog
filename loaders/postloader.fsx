@@ -26,6 +26,7 @@ let markdownPipeline =
     MarkdownPipelineBuilder()
         .UsePipeTables()
         .UseGridTables()
+        .UseYamlFrontMatter()
         .Build()
 
 type PostSource = {
