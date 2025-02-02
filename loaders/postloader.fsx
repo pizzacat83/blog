@@ -1,14 +1,19 @@
 #r "../_lib/Fornax.Core.dll"
 #r "../_lib/Markdig.dll"
+#r "nuget: YamlDotNet, 16.3.0"
+#r "nuget: FsToolkit.ErrorHandling, 4.18.0"
 
 open System.IO
 open Markdig
+open FsToolkit.ErrorHandling
 
 type PostKey = PostKey of string
 
 type Post = {
     key: PostKey
     title: string
+    published: System.DateOnly
+    summary: string
     content: string
 }
 
@@ -24,23 +29,36 @@ let markdownPipeline =
         .Build()
 
 type PostSource = {
+    frontmatter: string option
     title: string
     body: string
 }
 
 let splitMarkdown (markdown: string): PostSource  =
+    let lines = markdown.Split('\n')
+
+    let frontmatter =
+        if lines[0] = "---" then
+            lines[1..]
+                |> Array.takeWhile (fun x -> x <> "---")
+                |> String.concat "\n"
+                |> Some
+        else
+            None
+
     let title = 
-        markdown.Split('\n')
+        lines
         |> Array.tryFind (fun x -> x.StartsWith("# "))
         |> Option.map (fun x -> x.Substring(2))
         |> Option.defaultValue "No title"
 
     let body =
-        markdown.Split('\n')
+        lines
         |> Array.filter (fun x -> not (x.StartsWith("# ")))
         |> String.concat "\n"
 
     {
+        frontmatter = frontmatter
         title = title
         body = body
     }
@@ -50,7 +68,27 @@ let renderMarkdown (markdown: string) =
 
 let contentDir = "posts"
 
-let loadFile (projectRoot: string) (abspath: string): Post =
+type FrontMatter = {
+    published: System.DateOnly
+    summary: string
+}
+
+[<CLIMutable>]
+type FrontMatterSerialized = {
+    published: string
+    summary: string
+}
+
+let parseFrontMatter (frontmatter: string): FrontMatter =
+    let yaml = YamlDotNet.Serialization.DeserializerBuilder().Build()
+    let fm = yaml.Deserialize<FrontMatterSerialized> frontmatter
+
+    {
+        published = System.DateOnly.Parse(fm.published)
+        summary = fm.summary
+    }
+
+let loadFile (projectRoot: string) (abspath: string): Result<Post, string> =
     let markdown = File.ReadAllText abspath
 
     let chopLength =
@@ -62,14 +100,24 @@ let loadFile (projectRoot: string) (abspath: string): Post =
         |> Path.GetDirectoryName
         |> fun x -> x.[chopLength .. ]
 
-    let relpath = Path.Combine(dirPart, (abspath |> Path.GetFileNameWithoutExtension) + ".md").Replace("\\", "/")
+    let relpath: string = Path.Combine(dirPart, (abspath |> Path.GetFileNameWithoutExtension) + ".md").Replace("\\", "/")
 
     let source = splitMarkdown markdown
 
-    {
-        key = PostKey relpath
-        title = source.title
-        content = renderMarkdown source.body
+    let frontmatter =
+        source.frontmatter
+        |> Option.map parseFrontMatter
+        |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
+
+    result {
+        let! fm = frontmatter
+        return! Ok {
+            key = PostKey relpath
+            title = source.title
+            published = fm.published
+            summary = fm.summary
+            content = renderMarkdown source.body
+        }
     }
 
 let loader (projectRoot: string) (siteContent: SiteContents) =
@@ -78,8 +126,12 @@ let loader (projectRoot: string) (siteContent: SiteContents) =
     let files = Directory.GetFiles(postsPath, "*", options)
     files
     |> Array.filter (fun n -> n.EndsWith ".md")
-    |> Array.map (loadFile projectRoot)
-    |> Array.iter siteContent.Add
+    |> Array.iter (fun n ->
+        match loadFile projectRoot n with
+        | Ok post -> siteContent.Add(post)
+        | Error err -> siteContent.AddError({ Path = n; Message = err; Phase = Loading })
+    )
+
 
     siteContent.Add({disableLiveRefresh = false})
     siteContent

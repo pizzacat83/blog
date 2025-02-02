@@ -24,11 +24,13 @@ let websocketScript =
 
 
 let layout (post: Postloader.Post) =
+    let published = post.published.ToString("yyyy-MM-dd")
+
     Lib.layout  post.title $"""
 <article>
 
 <header>
-<time datetime="2022-05-21">2022-05-21</time>
+<time datetime="{published}">{published}</time>
 <h1>
     {post.title}
 </h1>
@@ -37,12 +39,22 @@ let layout (post: Postloader.Post) =
 </article>
     """ ["/assets/post.css"]
 
-let generate (ctx : SiteContents) (projectRoot: string) (postKey: string) =
+let generate' (ctx : SiteContents) (projectRoot: string) (postKey: string): Result<string, string> = 
     let postKey = Postloader.PostKey postKey
 
     let post =
         ctx.TryGetValues<Postloader.Post> ()
         |> Option.defaultValue Seq.empty
-        |> Seq.find (fun n -> n.key = postKey)
+        |> Seq.tryFind (fun n -> n.key = postKey)
 
-    layout post
+    match post with
+        | Some x ->  Ok (layout x)
+        | None -> Error "Post not found"
+
+let generate (ctx : SiteContents) (projectRoot: string) (postKey: string) =
+    match generate' ctx projectRoot postKey with
+    | Ok x -> x
+    | Error e ->
+        // TODO: proper error handling
+        printfn "Failed to generate post %s: %s" postKey e
+        ""

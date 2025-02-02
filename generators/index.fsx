@@ -2,11 +2,12 @@
 #load "lib.fsx"
 
 let renderPost (post: Postloader.Post) =
+    let published = post.published.ToString("yyyy-MM-dd")
     let href = $"/{post.key |> (fun (Postloader.PostKey x) -> x)}"
 
     $"""
     <article>
-        <time datetime="2025-02-01">2025-02-01</time>
+        <time datetime="{published}">{published}</time>
         <h1><a href="{href}">{post.title}</a></h1>
         
         <p class="post-summary">
@@ -17,7 +18,9 @@ let renderPost (post: Postloader.Post) =
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
     let posts = ctx.TryGetValues<Postloader.Post> () |> Option.defaultValue Seq.empty
-    let posts = Seq.rev posts // TODO: sort by date
+    let posts =
+        posts
+        |> Seq.sortByDescending (fun p -> p.published)
 
     Lib.layout "pizzacat83's blog" $"""
 <div class="post-list">

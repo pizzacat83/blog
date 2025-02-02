@@ -1,3 +1,10 @@
+---
+published: 2022-05-21
+summary: |-
+  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Esse quis dolor animi nostrum reprehenderit nihil nulla magni aperiam rem.
+  Facere aliquam tenetur voluptatem officiis porro rerum mollitia ratione provident id.
+---
+
 # A Useful Custom Function to Debug Firestore Security Rules
 
 Firestore security rules provide a function [`debug`](https://firebase.google.com/docs/reference/rules/rules.debug#debug), which logs the given value to `firestore-debug.log` (only when using the Firestore Emulator; it's no-op in production). But it just prints the value, with no information on its context. When your security rule doesn't work as expected, you might wrap every suspicious expression with `debug` and then struggle to figure out the correspondence between each log entires and the plenty calls to `debug`.
