@@ -3,11 +3,9 @@
 open Config
 open System.IO
 
-let postPredicate (projectRoot: string, page: string) =
-    // TODO: list files under posts/
-    let fileName = Path.Combine(projectRoot,page)
-    let ext = Path.GetExtension page
-    ext = ".md"
+let postPredicate (projectRoot: string, pagePath: string) =
+    let ext = Path.GetExtension pagePath
+    ext = ".md" && pagePath.StartsWith "posts/"
 
 let assetsPredicate (projectRoot: string, page: string) =
     page.StartsWith "assets/"
