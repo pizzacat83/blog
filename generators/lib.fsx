@@ -25,7 +25,7 @@ let websocketScript =
     """
 
 
-let layout (title: string) (children: string) =
+let layout (title: string) (children: string) (spreadsheets: string list) =
     $"""
 <!DOCTYPE html>
 <html lang="en">
@@ -35,8 +35,11 @@ let layout (title: string) (children: string) =
 <title>{title}</title>
 
 <link rel="stylesheet" href="/assets/style.css">
-<link rel="stylesheet" href="/assets/post.css">
-
+{
+    spreadsheets
+    |> List.map (fun s -> sprintf "<link rel=\"stylesheet\" href=\"%s\">" s)
+    |> String.concat "\n"
+}
 <link rel="alternate" type="application/rss+xml" title="posts" href="/rss">
 
 {websocketScript |> (fun (RawHtml x) -> x)}

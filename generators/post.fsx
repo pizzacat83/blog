@@ -35,7 +35,7 @@ let layout (post: Postloader.Post) =
 </header>
     {post.content}
 </article>
-    """
+    """ ["/assets/post.css"]
 
 let generate (ctx : SiteContents) (projectRoot: string) (postKey: string) =
     let postKey = Postloader.PostKey postKey
