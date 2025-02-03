@@ -1,5 +1,13 @@
 source https://api.nuget.org/v3/index.json
 
 nuget FSharp.Core content: none
+
+nuget FSharp.Compiler.Service
+nuget FSharp.Quotations.Evaluator
+
+nuget Argu
+nuget Suave
+nuget LibGit2Sharp
+
 nuget FsToolkit.ErrorHandling
 nuget YamlDotNet

@@ -1,7 +1,51 @@
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (9.0.101) - restriction: >= netstandard2.0
+    Argu (6.2.5)
+      FSharp.Core (>= 6.0) - restriction: >= netstandard2.0
+      System.Configuration.ConfigurationManager (>= 4.4) - restriction: >= netstandard2.0
+    FSharp.Compiler.Service (43.9.101)
+      FSharp.Core (9.0.101) - restriction: >= netstandard2.0
+      System.Buffers (>= 4.5.1) - restriction: >= netstandard2.0
+      System.Collections.Immutable (>= 8.0) - restriction: >= netstandard2.0
+      System.Diagnostics.DiagnosticSource (>= 8.0) - restriction: >= netstandard2.0
+      System.Memory (>= 4.5.5) - restriction: >= netstandard2.0
+      System.Reflection.Emit (>= 4.7) - restriction: >= netstandard2.0
+      System.Reflection.Metadata (>= 8.0) - restriction: >= netstandard2.0
+      System.Runtime.CompilerServices.Unsafe (>= 6.0) - restriction: >= netstandard2.0
+    FSharp.Core (9.0.101) - content: none
+    FSharp.Quotations.Evaluator (2.1)
+      FSharp.Core (>= 4.3.1) - restriction: >= netstandard2.0
     FsToolkit.ErrorHandling (4.18)
       FSharp.Core (>= 4.7.2) - restriction: && (>= netstandard2.0) (< netstandard2.1)
       FSharp.Core (>= 7.0.300) - restriction: >= netstandard2.1
+    LibGit2Sharp (0.31)
+      LibGit2Sharp.NativeBinaries (2.0.323) - restriction: || (>= net472) (>= net8.0)
+    LibGit2Sharp.NativeBinaries (2.0.323) - restriction: || (>= net472) (>= net8.0)
+    Suave (2.6.2)
+      FSharp.Core  - restriction: >= netstandard2.1
+    System.Buffers (4.6) - restriction: >= netstandard2.0
+    System.Collections.Immutable (9.0.1) - restriction: || (&& (>= net8.0) (< net9.0)) (>= netstandard2.0)
+      System.Memory (>= 4.5.5) - restriction: || (>= net462) (&& (< net8.0) (>= netstandard2.0))
+      System.Runtime.CompilerServices.Unsafe (>= 6.0) - restriction: || (>= net462) (&& (< net8.0) (>= netstandard2.0))
+    System.Configuration.ConfigurationManager (9.0.1) - restriction: >= netstandard2.0
+      System.Diagnostics.EventLog (>= 9.0.1) - restriction: >= net8.0
+      System.Security.Cryptography.ProtectedData (>= 9.0.1) - restriction: || (&& (< net462) (>= netstandard2.0)) (>= net8.0)
+    System.Diagnostics.DiagnosticSource (9.0.1) - restriction: >= netstandard2.0
+      System.Memory (>= 4.5.5) - restriction: || (>= net462) (&& (< net8.0) (>= netstandard2.0))
+      System.Runtime.CompilerServices.Unsafe (>= 6.0) - restriction: || (>= net462) (&& (< net8.0) (>= netstandard2.0))
+    System.Diagnostics.EventLog (9.0.1) - restriction: >= net8.0
+    System.Memory (4.6) - restriction: >= netstandard2.0
+      System.Buffers (>= 4.6) - restriction: || (>= net462) (&& (< netcoreapp2.1) (>= netstandard2.0))
+      System.Numerics.Vectors (>= 4.6) - restriction: || (>= net462) (&& (< netcoreapp2.1) (>= netstandard2.0))
+      System.Runtime.CompilerServices.Unsafe (>= 6.1) - restriction: || (>= net462) (&& (< netcoreapp2.1) (>= netstandard2.0))
+    System.Numerics.Vectors (4.6) - restriction: || (&& (>= net462) (>= netstandard2.0)) (&& (< netcoreapp2.1) (>= netstandard2.0))
+    System.Reflection.Emit (4.7) - restriction: >= netstandard2.0
+      System.Reflection.Emit.ILGeneration (>= 4.7) - restriction: || (&& (< monoandroid) (< monotouch) (< net45) (>= netstandard1.1) (< netstandard2.0) (< win8) (< wpa81) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< net45) (< netcoreapp2.0) (>= netstandard2.0) (< netstandard2.1) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< netstandard1.1) (>= portable-net45+win8+wpa81) (< win8)) (&& (< netstandard1.1) (>= win8)) (&& (< netstandard2.0) (>= wpa81)) (>= uap10.1)
+    System.Reflection.Emit.ILGeneration (4.7) - restriction: || (&& (< monoandroid) (< net45) (< netcoreapp2.0) (>= netstandard2.0) (< netstandard2.1) (< xamarintvos) (< xamarinwatchos)) (&& (< monoandroid) (< netstandard1.1) (>= netstandard2.0) (< win8)) (&& (< netstandard1.1) (>= netstandard2.0) (>= win8)) (&& (>= netstandard2.0) (>= uap10.1))
+    System.Reflection.Metadata (9.0.1) - restriction: >= netstandard2.0
+      System.Collections.Immutable (>= 9.0.1) - restriction: || (>= net462) (&& (>= net8.0) (< net9.0)) (&& (< net8.0) (>= netstandard2.0))
+      System.Memory (>= 4.5.5) - restriction: || (>= net462) (&& (< net8.0) (>= netstandard2.0))
+    System.Runtime.CompilerServices.Unsafe (6.1) - restriction: >= netstandard2.0
+    System.Security.Cryptography.ProtectedData (9.0.1) - restriction: || (&& (< net462) (>= netstandard2.0)) (>= net8.0)
+      System.Memory (>= 4.5.5) - restriction: && (< net462) (< net8.0) (>= netstandard2.0)
     YamlDotNet (16.3)

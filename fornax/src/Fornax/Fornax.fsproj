@@ -1,30 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>fornax</ToolCommandName>
     <RollForward>LatestMajor</RollForward>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Fornax.Core\Fornax.Core.fsproj" />
-
     <Compile Include="FSIRefs.fs" />
     <Compile Include="Logger.fs" />
     <Compile Include="Generator.fs" />
     <Compile Include="Fornax.fs" />
-    <!-- we want the include the raw template files
-          but not the rendered html (generated from tests)
-          but not pack the files (it would end up in the content directory by default if we did)
-          copy them to the project output
-          but copy them to the `blogTemplate` folder under the output so we cna find it at runtime -->
-    <Content Include="../Fornax.Template/**"
-      Exclude="../Fornax.Template/_public/**"
-      Pack="false"
-      CopyToOutputDirectory="PreserveNewest"
-      LinkBase="blogTemplate"
-    />
-    <None Include="paket.references" />
   </ItemGroup>
-  <Import Project="..\..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
 </Project>
