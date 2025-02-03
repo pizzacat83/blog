@@ -18,9 +18,6 @@ NUGET
     FsToolkit.ErrorHandling (4.18)
       FSharp.Core (>= 4.7.2) - restriction: && (>= netstandard2.0) (< netstandard2.1)
       FSharp.Core (>= 7.0.300) - restriction: >= netstandard2.1
-    LibGit2Sharp (0.31)
-      LibGit2Sharp.NativeBinaries (2.0.323) - restriction: || (>= net472) (>= net8.0)
-    LibGit2Sharp.NativeBinaries (2.0.323) - restriction: || (>= net472) (>= net8.0)
     Suave (2.6.2)
       FSharp.Core  - restriction: >= netstandard2.1
     System.Buffers (4.6) - restriction: >= netstandard2.0

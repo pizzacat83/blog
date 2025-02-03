@@ -7,7 +7,6 @@ nuget FSharp.Quotations.Evaluator
 
 nuget Argu
 nuget Suave
-nuget LibGit2Sharp
 
 nuget FsToolkit.ErrorHandling
 nuget YamlDotNet

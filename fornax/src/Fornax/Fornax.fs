@@ -2,13 +2,11 @@ module Fornax
 
 open System
 open System.IO
-open System.Threading
 open Argu
 open Suave
 open Suave.Filters
 open Suave.Operators
 
-open LibGit2Sharp
 open Suave.Sockets
 open Suave.Sockets.Control
 open Suave.WebSocket
