@@ -1,5 +1,6 @@
 /_lib/
 /_public/
 /packages/
+bin/
 obj/
 Paket.Restore.targets
