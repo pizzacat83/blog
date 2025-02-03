@@ -460,26 +460,29 @@ let generateFolder (sc : SiteContents) (projectRoot : string) (isWatch: bool) =
             | Error er ->
                 errorfn "LOADER ERROR: %s" er
                 state)
-    sc.Errors() |> List.iter (fun er -> errorfn "BAD FILE: %s" er.Path)
+    sc.Errors() |> List.iter (fun er -> errorfn "BAD FILE: %s; %A" er.Path er)
 
-    let logResult (result : GeneratorResult) =
-        match result with
-        | GeneratorIgnored -> ()
-        | GeneratorSuccess None -> ()
-        | GeneratorSuccess (Some message) ->
-            okfn "%s" message
-        | GeneratorFailure message ->
-            // if one generator fails we want to exit early and report the problem to the operator
-            raise (FornaxGeneratorException message)
+    if sc.Errors().Length > 0 then
+        ()
+    else
+        let logResult (result : GeneratorResult) =
+            match result with
+            | GeneratorIgnored -> ()
+            | GeneratorSuccess None -> ()
+            | GeneratorSuccess (Some message) ->
+                okfn "%s" message
+            | GeneratorFailure message ->
+                // if one generator fails we want to exit early and report the problem to the operator
+                raise (FornaxGeneratorException message)
 
-    runOnceGenerators fsi config sc projectRoot
-    |> List.iter logResult
+        runOnceGenerators fsi config sc projectRoot
+        |> List.iter logResult
 
-    Directory.GetFiles(projectRoot, "*", SearchOption.AllDirectories)
-    |> Array.iter (fun filePath ->
-        filePath
-        |> relative projectRoot
-        |> generate fsi config sc projectRoot
-        |> logResult)
+        Directory.GetFiles(projectRoot, "*", SearchOption.AllDirectories)
+        |> Array.iter (fun filePath ->
+            filePath
+            |> relative projectRoot
+            |> generate fsi config sc projectRoot
+            |> logResult)
 
-    informationfn "Generation time: %A" sw.Elapsed
+        informationfn "Generation time: %A" sw.Elapsed
