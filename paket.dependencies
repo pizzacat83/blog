@@ -1,4 +1,5 @@
 source https://api.nuget.org/v3/index.json
 
+nuget FSharp.Core content: none
 nuget FsToolkit.ErrorHandling
 nuget YamlDotNet

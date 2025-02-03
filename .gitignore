@@ -1,3 +1,5 @@
 /_lib/
 /_public/
 /packages/
+obj/
+Paket.Restore.targets
