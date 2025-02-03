@@ -110,10 +110,16 @@ let getWebServerConfig port =
         defaultConfig
 
 let router basePath =
+    let pubdir = Path.Combine(basePath, "_public")
     choose [
         path "/" >=> Redirection.redirect "/index.html"
-        (Files.browse (Path.Combine(basePath, "_public")))
+        Files.browse pubdir
         path "/websocket" >=> handShake ws
+        (fun ctx ->
+            // return ./foo/index.html when /foo is requested
+            let newPath = Path.Combine(ctx.request.path, "index.html")
+            Files.browseFile pubdir newPath ctx
+        )
     ]
 
 [<EntryPoint>]
