@@ -47,7 +47,6 @@ with
             | Output _ -> "Specify an output folder"
 
 type [<CliPrefix(CliPrefix.None)>] Arguments =
-    | New of ParseResults<NewOptions>
     | Build
     | Watch of ParseResults<WatchOptions>
     | Version
@@ -56,7 +55,6 @@ with
     interface IArgParserTemplate with
         member s.Usage =
             match s with
-            | New _ -> "Create new web site"
             | Build -> "Build web site"
             | Watch _ -> "Start watch mode rebuilding "
             | Version -> "Print version"
@@ -113,55 +111,6 @@ let getWebServerConfig port =
     | None ->
         defaultConfig
 
-let getOutputDirectory (output : option<string>) (cwd : string) = 
-    match output with
-    | Some output ->
-        output
-    | None ->
-        cwd
-
-// Recursively unset read-only attributes inside a folder 
-// Like, say, .git
-let normalizeFiles directory =
-    Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories)
-    |> Seq.iter (fun path -> File.SetAttributes(path, FileAttributes.Normal))
-
-    directory
-
-let deleteDirectory directory =
-    Directory.Delete(directory, true)
-
-let deleteGit (gitDirectory : string) =
-    let test = Directory.Exists gitDirectory
-
-    match test with
-    | true -> gitDirectory |> normalizeFiles |> deleteDirectory  
-    | false -> ()
-        
-let copyDirectories (input : string) (output : string) = 
-    // Copy the folders from the template directory into the current folder.
-    Directory.GetDirectories(input, "*", SearchOption.AllDirectories)
-    |> Seq.iter (fun p -> Directory.CreateDirectory(p.Replace(input, output)) |> ignore)
-
-    // Copy the files from the template directory into the current folder.
-    Directory.GetFiles(input, "*.*", SearchOption.AllDirectories)
-    |> Seq.iter (fun p -> File.Copy(p, p.Replace(input, output)))
-
-let handleTemplate (template : option<string>) (outputDirectory : string) : unit = 
-    match template with
-    | Some template ->
-        let uriTest, _ = Uri.TryCreate(template, UriKind.Absolute)
-
-        match uriTest with
-        | true  -> Repository.Clone(template, outputDirectory) |> ignore
-                   Path.Combine(outputDirectory, ".git") |> deleteGit
-        | false -> copyDirectories template outputDirectory
-                   Path.Combine(outputDirectory, ".git") |> deleteGit
-    | None ->
-        // The default path of the directory that holds the scaffolding for a new website.
-        let path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "blogTemplate")
-        copyDirectories path outputDirectory
-
 let router basePath =
     choose [
         path "/" >=> Redirection.redirect "/index.html"
@@ -188,28 +137,6 @@ let main argv =
         let cwd = Directory.GetCurrentDirectory ()
 
         match result with
-        | Some (New newOptions) ->
-            // The path of Fornax.Core.dll, which is located where the dotnet tool is installed.
-            let corePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Fornax.Core.dll")
-
-            // Parse output flag and create a folder in the cwd to copy files to
-            let outputDirectory = getOutputDirectory (newOptions.TryPostProcessResult(<@ Output @>, string)) cwd
-
-            // Handle the template used to scaffold a new website
-            handleTemplate (newOptions.TryPostProcessResult(<@ Template @>, string)) (outputDirectory)
-
-            // Create the _lib directory in the current folder.  It holds
-            // Fornax.Core.dll, which is used to provide Intellisense/autocomplete
-            // in the .fsx files.
-            Path.Combine(outputDirectory, "_lib")
-            |> Directory.CreateDirectory
-            |> ignore
-
-            // Copy the Fornax.Core.dll into _lib
-            // Some/most times Fornax.Core.dll already exists
-            File.Copy(corePath, outputDirectory + "/_lib/Fornax.Core.dll", true)
-            okfn "New project successfully created."
-            0
         | Some Build ->
             try
                 let sc = SiteContents ()
