@@ -178,13 +178,16 @@ let main argv =
                         .Split(Path.DirectorySeparatorChar)
                 
                 let shouldHandle =
-                    pathDirectories
+                    (pathDirectories
                     |> Array.exists (fun fragment ->
                         fragment = "_public" ||     
                         fragment = ".sass-cache" ||    
                         fragment = ".git" ||           
                         fragment = ".ionide")
-                    |> not
+                    |> not)
+                    // TODO: make it configurable?
+                    && pathDirectories[0] <> "fornax"
+                    && pathDirectories[0] <> "packages"
 
                 if shouldHandle then
                     let lastTimeWrite = File.GetLastWriteTime(e.FullPath)
