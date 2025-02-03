@@ -193,19 +193,28 @@ module GeneratorEvaluator =
 
         generator
         |> Result.bind (fun generator ->
-            let result = invokeFunction generator [box siteContent; box projectRoot; box page ]
+            let result =
+                try
+                    invokeFunction generator [box siteContent; box projectRoot; box page ] |> Ok
+                with 
+                    // TODO: I think this exception should be handled inside invokeFunction
+                    | :? System.Reflection.TargetInvocationException as ex ->
+                        Error (ex.InnerException.Message)
 
             result
-            |> Option.bind (tryUnbox<string>)
-            |> function
-                | Some s -> Ok (Encoding.UTF8.GetBytes s)
-                | None ->
-                    result
-                    |> Option.bind (tryUnbox<byte[]>)
-                    |> function
-                        | Some bytes -> Ok bytes
-                        | None ->
-                            sprintf "HTML generator %s couldn't be compiled" generatorPath |> Error)
+            |> Result.bind (fun result ->
+                result
+                |> Option.bind (tryUnbox<string>)
+                |> function
+                    | Some s -> Ok (Encoding.UTF8.GetBytes s)
+                    | None ->
+                        result
+                        |> Option.bind (tryUnbox<byte[]>)
+                        |> function
+                            | Some bytes -> Ok bytes
+                            | None ->
+                                sprintf "HTML generator %s couldn't be compiled" generatorPath |> Error)
+            )
 
     ///`generatorPath` - absolute path to `.fsx` file containing the generator
     ///`projectRoot` - path to root of the site project
