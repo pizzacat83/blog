@@ -3,4 +3,5 @@
 /packages/
 bin/
 obj/
+nupkg/
 Paket.Restore.targets
