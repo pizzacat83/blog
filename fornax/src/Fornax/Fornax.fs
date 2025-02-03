@@ -157,10 +157,9 @@ let main argv =
             let mutable lastAccessed = Map.empty<string, DateTime>
             let waitingForChangesMessage = "Generated site with errors. Waiting for changes..."
 
-            let sc = SiteContents ()
-
-
             let guardedGenerate () =
+                let sc = SiteContents ()
+
                 try
                     do generateFolder sc cwd true
                 with
