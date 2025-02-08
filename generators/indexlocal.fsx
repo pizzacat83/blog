@@ -39,10 +39,10 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
     Lib.layout (Some language) "pizzacat83's blog" $"""
 <div class="index-main">
     <div class="lang-selector">
-        {languageSelector} / <a href="/">All languages</a>
-        </div>
+        <a href="/">All languages</a> / {languageSelector}
+    </div>
 
-        <div class="post-list">
+    <div class="post-list">
         <div>
             { posts
                 |> Seq.map renderPost
