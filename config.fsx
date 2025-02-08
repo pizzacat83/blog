@@ -14,7 +14,6 @@ let config = {
     Generators = [
         // {Script = "less.fsx"; Trigger = OnFileExt ".less"; OutputFile = ChangeExtension "css" }
         // {Script = "sass.fsx"; Trigger = OnFileExt ".scss"; OutputFile = ChangeExtension "css" }
-        // {Script = "post.fsx"; Trigger = OnFilePredicate postPredicate; OutputFile = ChangeExtension "html" }
         {Script = "post.fsx"; Trigger = Once; OutputFile = MultipleFiles id }
         {Script = "asset.fsx"; Trigger = OnFilePredicate assetsPredicate; OutputFile = SameFileName }
         {Script = "indexlocal.fsx"; Trigger = Once; OutputFile = MultipleFiles id }
