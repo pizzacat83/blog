@@ -20,8 +20,7 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
         Lib.getPrimaryLocalizedPosts ctx
         |> Seq.sortByDescending (fun p -> p.published)
 
-    $"""
-<?xml version="1.0" encoding="UTF-8" ?>
+    $"""<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
     <channel>
         <title>pizzacat83's blog</title>
