@@ -50,7 +50,7 @@
                 margin-bottom: 0.5rem;
 
                 a {
-                    color: var(--dark-gray-heading);
+                    color: var(--dark-gray);
 
                     .fa-arrow-up-right-from-square {
                         font-size: 1rem;
