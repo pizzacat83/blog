@@ -187,6 +187,7 @@ let main argv =
                     // TODO: make it configurable?
                     && pathDirectories[0] <> "fornax"
                     && pathDirectories[0] <> "packages"
+                    && Path.GetFileName e.FullPath <> ".DS_Store"
 
                 if shouldHandle then
                     let lastTimeWrite = File.GetLastWriteTime(e.FullPath)
