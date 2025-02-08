@@ -24,10 +24,10 @@ let websocketScript =
     </script>
     """
 
-let topPath (language: Postloader.Language) =
+let topPath (language: Postloader.Language) = 
     match language with
-    | Postloader.English -> "/en"
-    | Postloader.Japanese -> "/ja"
+    | Postloader.English -> "en"
+    | Postloader.Japanese -> "ja"
 
 
 let layout (language: Postloader.Language) (title: string) (children: string) (spreadsheets: string list) =
@@ -54,7 +54,7 @@ let layout (language: Postloader.Language) (title: string) (children: string) (s
 <header>
 <nav>
     <div class="blog-title">
-        <a href="{topPath language}">pizzacat83's blog</a>
+        <a href="/{topPath language}">pizzacat83's blog</a>
     </div>
     <div>
         <a href="https://pizzacat83.com">About</a>
@@ -74,3 +74,29 @@ let layout (language: Postloader.Language) (title: string) (children: string) (s
 </body>
 </html>
     """
+
+type LocalizedPost = {
+    key: Postloader.PostKey
+    language: Postloader.Language
+    published: System.DateOnly
+    title: string
+    summary: string
+    body: string
+}
+
+let getLocalizedPosts (ctx: SiteContents) (language: Postloader.Language): LocalizedPost seq =
+    let posts = ctx.TryGetValues<Postloader.Post> () |> Option.defaultValue Seq.empty
+    posts
+    |> Seq.choose (fun post ->
+        post.contents |> List.tryFind (fun c -> c.language = language)
+        |> Option.map (fun content ->
+            {
+                key = post.key
+                language = content.language
+                published = post.published
+                title = content.title
+                summary = content.summary
+                body = content.body
+            }
+        )
+    )

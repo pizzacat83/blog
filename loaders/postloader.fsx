@@ -8,6 +8,7 @@ open Markdig
 open FsToolkit.ErrorHandling
 
 type Language = English | Japanese
+let languages = [English; Japanese]
 
 type PostKey = PostKey of string
 
@@ -132,7 +133,7 @@ let loadPost (dirpath: string): Result<Post, string> =
 
     result {
         let! sources =
-            [English; Japanese]
+            languages
             |> List.choose (fun lang ->
                 let filename = match lang with | English -> "en.md" | Japanese -> "ja.md"
                 let path = Path.Combine(dirpath, filename)
