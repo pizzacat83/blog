@@ -14,6 +14,14 @@
             font-size: 0.75rem;
         }
 
+        .lang-selector a {
+            background-color: var(--lighter-gray);
+            color: var(--dim-gray);
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+        }
+
         .badge-external-post {
             display: inline-block;
             background-color: var(--lighter-gray);

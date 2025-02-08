@@ -83,6 +83,7 @@ let layout (language: Postloader.Language option) (title: string) (children: str
 type LocalizedPost = {
     key: Postloader.PostKey
     language: Postloader.Language
+    languages: Set<Postloader.Language>
     published: System.DateOnly
     title: string
     summary: string
@@ -98,10 +99,34 @@ let getLocalizedPosts (ctx: SiteContents) (language: Postloader.Language): Local
             {
                 key = post.key
                 language = content.language
+                languages = post.contents |> List.map (fun c -> c.language) |> Set.ofList
                 published = post.published
                 title = content.title
                 summary = content.summary
                 body = content.body
             }
         )
+    )
+
+let postHref (language: Postloader.Language) (key: Postloader.PostKey) =
+    $"/{topPath language}/posts/{key |> (fun (Postloader.PostKey x) -> x)}"
+
+let langSelector (post: LocalizedPost): string option =
+    post.languages
+    |> Seq.sortBy (function
+        | Postloader.Language.English -> 1
+        | Postloader.Language.Japanese -> 2
+    )
+    |> List.ofSeq
+    |> (fun l -> if List.length l > 1 then Some l else None)
+    |> Option.map (List.map (fun lang ->
+        let langCode =
+            match lang with
+            | Postloader.Language.English -> "en"
+            | Postloader.Language.Japanese -> "ja"
+        $"""<a href="{postHref lang post.key}">{langCode}</a>"""
+    ))
+    |> Option.map (String.concat " ")
+    |> Option.map (fun s ->
+        $"""<span class="lang-selector">{s}</span>"""
     )

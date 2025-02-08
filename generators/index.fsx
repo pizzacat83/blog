@@ -3,11 +3,12 @@
 
 let renderPost (post: Lib.LocalizedPost) =
     let published = post.published.ToString("yyyy-MM-dd")
-    let href = $"/{Lib.topPath post.language}/posts/{post.key |> (fun (Postloader.PostKey x) -> x)}"
+    let href = Lib.postHref post.language post.key
 
     $"""
     <article>
         <time datetime="{published}">{published}</time>
+        {Lib.langSelector post |> Option.defaultValue ""}
         <h1><a href="{href}">{post.title}</a></h1>
         
         <p class="post-summary">
@@ -30,6 +31,7 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
             {
                 key = post.key
                 language = content.language
+                languages = post.contents |> List.map (fun c -> c.language) |> Set.ofList
                 published = post.published
                 title = content.title
                 summary = content.summary
