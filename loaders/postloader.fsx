@@ -7,20 +7,26 @@ open System.IO
 open Markdig
 open FsToolkit.ErrorHandling
 
+type Language = English | Japanese
+
 type PostKey = PostKey of string
+
+type Content = {
+    language: Language
+    title: string
+    summary: string
+    body: string
+}
 
 type Post = {
     key: PostKey
-    title: string
     published: System.DateOnly
-    summary: string
-    content: string
+    contents: Content list
 }
 
 type PostConfig = {
     disableLiveRefresh: bool
 }
-
 
 let markdownPipeline =
     MarkdownPipelineBuilder()
@@ -29,13 +35,13 @@ let markdownPipeline =
         .UseYamlFrontMatter()
         .Build()
 
-type PostSource = {
+type SegmentedSource = {
     frontmatter: string option
     title: string
     body: string
 }
 
-let splitMarkdown (markdown: string): PostSource  =
+let splitMarkdown (markdown: string): SegmentedSource  =
     let lines = markdown.Split('\n')
 
     let frontmatter =
@@ -89,54 +95,64 @@ let parseFrontMatter (frontmatter: string): FrontMatter =
         summary = fm.summary
     }
 
-let loadFile (projectRoot: string) (abspath: string): Result<Post, string> =
-    let markdown = File.ReadAllText abspath
+type ParsedSource = {
+    language: Language
+    frontmatter: FrontMatter
+    title: string
+    body: string
+}
 
-    let chopLength =
-        if projectRoot.EndsWith(Path.DirectorySeparatorChar) then projectRoot.Length
-        else projectRoot.Length + 1
+let readFile (path: string): Result<string, string> =
+    try
+        Ok (File.ReadAllText path)
+    with
+    | e -> Error e.Message
 
-    let dirPart =
-        abspath
-        |> Path.GetDirectoryName
-        |> fun x -> x.[chopLength .. ]
 
+let loadPost (dirpath: string): Result<Post, string> =
     let key =
-        abspath
-        |> Path.GetDirectoryName
+        dirpath
         |> Path.GetFileName
         |> PostKey
 
-    let source = splitMarkdown markdown
-
-    let frontmatter =
-        source.frontmatter
-        |> Option.map parseFrontMatter
-        |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
+    let enpath = Path.Combine(dirpath, "en.md")
+    let jppath = Path.Combine(dirpath, "jp.md")
 
     result {
-        let! fm = frontmatter
+        let! source = readFile enpath
+
+        let source = splitMarkdown source
+        let! frontmatter = source.frontmatter
+                            |> Option.map parseFrontMatter
+                            |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
+
+        let source: ParsedSource = {
+            language = English
+            frontmatter = frontmatter
+            title = source.title
+            body = renderMarkdown source.body
+        }
+
         return! Ok {
             key = key
-            title = source.title
-            published = fm.published
-            summary = fm.summary
-            content = renderMarkdown source.body
+            published = source.frontmatter.published
+            contents = [{
+                language = source.language
+                title = source.title
+                summary = source.frontmatter.summary
+                body = source.body
+            }]
         }
     }
 
 let loader (projectRoot: string) (siteContent: SiteContents) =
     let postsPath = Path.Combine(projectRoot, contentDir)
-    let options = EnumerationOptions(RecurseSubdirectories = true)
-    let files = Directory.GetFiles(postsPath, "*", options)
-    files
-    |> Array.filter (fun n -> n.EndsWith ".md")
+    Directory.GetDirectories(postsPath)
     |> Array.iter (fun n ->
-        match loadFile projectRoot n with
+        match loadPost n with
         | Ok post -> siteContent.Add(post)
         | Error err -> siteContent.AddError({ Path = n; Message = err; Phase = Loading })
     )
-
 
     siteContent.Add({disableLiveRefresh = false})
     siteContent

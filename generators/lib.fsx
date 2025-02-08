@@ -23,8 +23,13 @@ let websocketScript =
     </script>
     """
 
+let topPath (language: Postloader.Language) =
+    match language with
+    | Postloader.English -> "/en"
+    | Postloader.Japanese -> "/ja"
 
-let layout (title: string) (children: string) (spreadsheets: string list) =
+
+let layout (language: Postloader.Language) (title: string) (children: string) (spreadsheets: string list) =
     $"""
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +53,7 @@ let layout (title: string) (children: string) (spreadsheets: string list) =
 <header>
 <nav>
     <div class="blog-title">
-        <a href="/">pizzacat83's blog</a>
+        <a href="{topPath language}">pizzacat83's blog</a>
     </div>
     <div>
         <a href="https://pizzacat83.com">About</a>

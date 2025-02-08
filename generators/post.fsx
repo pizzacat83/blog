@@ -23,43 +23,52 @@ let websocketScript =
     """
 
 
-let layout (post: Postloader.Post) =
+let layout (post: Postloader.Post) (content: Postloader.Content) =
+    let language = content.language
+
     let published = post.published.ToString("yyyy-MM-dd")
 
-    Lib.layout  post.title $"""
+    Lib.layout language content.title $"""
 <article>
 
 <header>
 <time datetime="{published}">{published}</time>
 <h1>
-    {post.title}
+    {content.title}
 </h1>
 </header>
-    {post.content}
+    {content.body}
 </article>
     """ ["/assets/post.css"]
 
-let generate' (ctx : SiteContents) (projectRoot: string) (relpath: string): Result<string, string> = 
+type Post = {
+    language: Postloader.Language
+    html: string
+}
 
-    let postKey =
-        relpath
-        |> System.IO.Path.GetDirectoryName
-        |> System.IO.Path.GetFileName
-        |> Postloader.PostKey
+let langCode = function
+    | Postloader.English -> "en"
+    | Postloader.Japanese -> "ja"
 
-    let post =
+let generatePost (post: Postloader.Post): Post list = 
+    post.contents
+    |> List.map (fun content ->
+        let html = layout post content
+        { language = content.language; html = html }
+    )
+
+let generate (ctx : SiteContents) (projectRoot: string) (_): list<string * string> =
+    let posts =
         ctx.TryGetValues<Postloader.Post> ()
         |> Option.defaultValue Seq.empty
-        |> Seq.tryFind (fun n -> n.key = postKey)
-
-    match post with
-        | Some x ->  Ok (layout x)
-        | None -> Error "Post not found"
-
-let generate (ctx : SiteContents) (projectRoot: string) (postKey: string) =
-    match generate' ctx projectRoot postKey with
-    | Ok x -> x
-    | Error e ->
-        // TODO: proper error handling
-        printfn "Failed to generate post %s: %s" postKey e
-        ""
+    
+    posts
+      |> Seq.map (fun post ->
+            generatePost post     
+            |> List.map (fun p ->
+                let filename = sprintf "%s/posts/%s/index.html" (langCode  p.language) (post.key |> fun (Postloader.PostKey k) -> k) in
+                (filename, p.html)
+            )
+      )
+    |> Seq.concat
+    |> List.ofSeq

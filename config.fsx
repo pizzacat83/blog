@@ -15,10 +15,10 @@ let config = {
         // {Script = "less.fsx"; Trigger = OnFileExt ".less"; OutputFile = ChangeExtension "css" }
         // {Script = "sass.fsx"; Trigger = OnFileExt ".scss"; OutputFile = ChangeExtension "css" }
         // {Script = "post.fsx"; Trigger = OnFilePredicate postPredicate; OutputFile = ChangeExtension "html" }
-        {Script = "post.fsx"; Trigger = OnFilePredicate postPredicate; OutputFile = ChangeExtension "html" }
+        {Script = "post.fsx"; Trigger = Once; OutputFile = MultipleFiles id }
         {Script = "asset.fsx"; Trigger = OnFilePredicate assetsPredicate; OutputFile = SameFileName }
-        {Script = "index.fsx"; Trigger = Once; OutputFile = NewFileName "index.html" }
-        {Script = "rss.fsx"; Trigger = Once; OutputFile = NewFileName "rss.xml" }
+        // {Script = "index.fsx"; Trigger = Once; OutputFile = NewFileName "index.html" }
+        // {Script = "rss.fsx"; Trigger = Once; OutputFile = NewFileName "rss.xml" }
         // {Script = "about.fsx"; Trigger = Once; OutputFile = NewFileName "about.html" }
         // {Script = "contact.fsx"; Trigger = Once; OutputFile = NewFileName "contact.html" }
     ]
