@@ -22,7 +22,7 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
         Lib.getLocalizedPosts ctx language
         |> Seq.sortByDescending (fun p -> p.published)
 
-    let languageSelector =
+    let languageFilter =
         Postloader.languages
         |> Seq.map (fun lang ->
             let text =
@@ -38,8 +38,8 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
 
     Lib.layout (Some language) "pizzacat83's blog" $"""
 <div class="index-main">
-    <div class="lang-selector">
-        <a href="/">All languages</a> / {languageSelector}
+    <div class="lang-filter">
+        <a href="/">All languages</a> / {languageFilter}
     </div>
 
     <div class="post-list">

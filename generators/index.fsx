@@ -24,7 +24,7 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
 
     Lib.layout None "pizzacat83's blog" $"""
 <div class="index-main">
-    <div class="lang-selector">
+    <div class="lang-filter">
     All languages / <a href="/en">English</a> / <a href="/ja">日本語</a>
     </div>
 

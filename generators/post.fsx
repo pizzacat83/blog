@@ -31,6 +31,7 @@ let layout (post: Lib.LocalizedPost) =
 
 <header>
 <time datetime="{published}">{published}</time>
+{Lib.langSelector post |> Option.defaultValue ""}
 <h1>
     {post.title}
 </h1>
