@@ -102,12 +102,27 @@ type ParsedSource = {
     body: string
 }
 
-let readFile (path: string): Result<string, string> =
+let readFile (path: string): string option =
     try
-        Ok (File.ReadAllText path)
+        Some (File.ReadAllText path)
     with
-    | e -> Error e.Message
+    | e -> None
 
+let parseSource (language: Language) (source: string): Result<ParsedSource, string> =
+    result {
+        let source = splitMarkdown source
+        let! frontmatter =
+            source.frontmatter
+            |> Option.map parseFrontMatter
+            |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
+
+        return! Ok {
+            language = English
+            frontmatter = frontmatter
+            title = source.title
+            body = renderMarkdown source.body
+        }
+    }
 
 let loadPost (dirpath: string): Result<Post, string> =
     let key =
@@ -115,33 +130,52 @@ let loadPost (dirpath: string): Result<Post, string> =
         |> Path.GetFileName
         |> PostKey
 
-    let enpath = Path.Combine(dirpath, "en.md")
-    let jppath = Path.Combine(dirpath, "jp.md")
-
     result {
-        let! source = readFile enpath
+        let! sources =
+            [English; Japanese]
+            |> List.choose (fun lang ->
+                let filename = match lang with | English -> "en.md" | Japanese -> "ja.md"
+                let path = Path.Combine(dirpath, filename)
+                readFile path |> Option.map (fun s -> (lang, s))
+            )
+            |> List.traverseResultA (fun (lang, source) -> 
+                result {
+                    let source = splitMarkdown source
+                    let! frontmatter =
+                        source.frontmatter
+                        |> Option.map parseFrontMatter
+                        |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
 
-        let source = splitMarkdown source
-        let! frontmatter = source.frontmatter
-                            |> Option.map parseFrontMatter
-                            |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
+                    return! Ok {
+                        language = lang
+                        frontmatter = frontmatter
+                        title = source.title
+                        body = renderMarkdown source.body
+                    }
+                } |> Result.mapError (sprintf "Failed to parse post %A: %s" lang)
+            )
+            |> Result.mapError (String.concat "; ")
 
-        let source: ParsedSource = {
-            language = English
-            frontmatter = frontmatter
-            title = source.title
-            body = renderMarkdown source.body
-        }
+        if List.isEmpty sources then
+            return! Error "No post sources found"
+
+        let published = sources[0].frontmatter.published
+
+        let contents: Content list =
+            sources
+            |> List.map (fun source ->
+                {
+                    language = source.language
+                    title = source.title
+                    summary = source.frontmatter.summary
+                    body = source.body
+                }
+            )
 
         return! Ok {
             key = key
-            published = source.frontmatter.published
-            contents = [{
-                language = source.language
-                title = source.title
-                summary = source.frontmatter.summary
-                body = source.body
-            }]
+            published = published
+            contents = contents
         }
     }
 
