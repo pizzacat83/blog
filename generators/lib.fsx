@@ -73,7 +73,7 @@ let layout (language: Postloader.Language option) (title: string) (children: str
 </main>
 
 <footer>
-   <p>© 2025 pizzacat83 • <a href="/rss">Feed</a></p>
+   <p>© 2025 pizzacat83 • <a href="/rss.xml">Feed</a></p>
 </footer>
 
 </body>
