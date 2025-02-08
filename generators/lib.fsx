@@ -108,6 +108,28 @@ let getLocalizedPosts (ctx: SiteContents) (language: Postloader.Language): Local
         )
     )
 
+let choosePrimaryContent (post: Postloader.Post) =
+    // TODO: enable specifying primary language per Post
+    post.contents |> List.tryFind (fun c -> c.language = Postloader.Language.Japanese)
+    |> Option.defaultValue (post.contents[0])
+
+let getPrimaryLocalizedPosts (ctx: SiteContents): LocalizedPost seq =
+    ctx.TryGetValues<Postloader.Post> ()
+    |> Option.defaultValue Seq.empty
+    |> Seq.map (fun (post) ->
+        let content = choosePrimaryContent post
+        {
+            key = post.key
+            language = content.language
+            languages = post.contents |> List.map (fun c -> c.language) |> Set.ofList
+            published = post.published
+            title = content.title
+            summary = content.summary
+            body = content.body
+        }: LocalizedPost
+    )
+
+
 let postHref (language: Postloader.Language) (key: Postloader.PostKey) =
     $"/{topPath language}/posts/{key |> (fun (Postloader.PostKey x) -> x)}"
 

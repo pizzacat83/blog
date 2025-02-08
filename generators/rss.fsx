@@ -2,9 +2,9 @@
 #r "../_lib/Fornax.Core.dll"
 #load "lib.fsx"
 
-let renderPost (post: Postloader.Post) =
+let renderPost (post: Lib.LocalizedPost) =
     let published = post.published.ToString("ddd, dd MMM yyyy")
-    let href = $"/posts/{post.key |> (fun (Postloader.PostKey x) -> x)}"
+    let href = Lib.postHref post.language post.key
 
     $"""
     <item>
@@ -16,9 +16,8 @@ let renderPost (post: Postloader.Post) =
     """
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
-    let posts = ctx.TryGetValues<Postloader.Post> () |> Option.defaultValue Seq.empty
     let posts =
-        posts
+        Lib.getPrimaryLocalizedPosts ctx
         |> Seq.sortByDescending (fun p -> p.published)
 
     $"""

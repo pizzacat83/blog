@@ -19,7 +19,7 @@ let config = {
         {Script = "asset.fsx"; Trigger = OnFilePredicate assetsPredicate; OutputFile = SameFileName }
         {Script = "indexlocal.fsx"; Trigger = Once; OutputFile = MultipleFiles id }
         {Script = "index.fsx"; Trigger = Once; OutputFile = NewFileName "index.html" }
-        // {Script = "rss.fsx"; Trigger = Once; OutputFile = NewFileName "rss.xml" }
+        {Script = "rss.fsx"; Trigger = Once; OutputFile = NewFileName "rss.xml" }
         // {Script = "about.fsx"; Trigger = Once; OutputFile = NewFileName "about.html" }
         // {Script = "contact.fsx"; Trigger = Once; OutputFile = NewFileName "contact.html" }
     ]

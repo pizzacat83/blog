@@ -17,28 +17,10 @@ let renderPost (post: Lib.LocalizedPost) =
     </article>
     """
 
-let choosePrimaryContent (post: Postloader.Post) =
-    // TODO: enable specifying primary language per Post
-    post.contents |> List.tryFind (fun c -> c.language = Postloader.Language.Japanese)
-    |> Option.defaultValue (post.contents[0])
-
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
     let posts =
-        ctx.TryGetValues<Postloader.Post> ()
-        |> Option.defaultValue Seq.empty
-        |> Seq.map (fun (post) ->
-            let content = choosePrimaryContent post
-            {
-                key = post.key
-                language = content.language
-                languages = post.contents |> List.map (fun c -> c.language) |> Set.ofList
-                published = post.published
-                title = content.title
-                summary = content.summary
-                body = content.body
-            }: Lib.LocalizedPost
-        )
-    
+        Lib.getPrimaryLocalizedPosts ctx
+        |> Seq.sortByDescending (fun p -> p.published)
 
     Lib.layout None "pizzacat83's blog" $"""
 <div class="post-list">
