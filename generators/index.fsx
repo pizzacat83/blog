@@ -23,13 +23,20 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
         |> Seq.sortByDescending (fun p -> p.published)
 
     Lib.layout None "pizzacat83's blog" $"""
-<div class="post-list">
-    <div>
-        { posts
-            |> Seq.map renderPost
-            |> String.concat ""
-        }
+<div class="index-main">
+    <div class="lang-selector">
+    <a href="/en">English</a> / <a href="/ja">日本語</a> / All languages
     </div>
+
+    <div class="post-list">
+        <div>
+            { posts
+                |> Seq.map renderPost
+                |> String.concat ""
+            }
+        </div>
+    </div>
+
 </div>
     """ ["/assets/index.css"]
     

@@ -22,14 +22,35 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
         Lib.getLocalizedPosts ctx language
         |> Seq.sortByDescending (fun p -> p.published)
 
+    let languageSelector =
+        Postloader.languages
+        |> Seq.map (fun lang ->
+            let text =
+                match lang with
+                | Postloader.Language.English -> "English"
+                | Postloader.Language.Japanese -> "日本語"
+            if lang = language then
+                $"""<span>{text}</span>"""
+            else
+                $"""<a href="/{Lib.topPath lang}">{text}</a>"""
+        )
+        |> String.concat " / "
+
     Lib.layout (Some language) "pizzacat83's blog" $"""
-<div class="post-list">
-    <div>
-        { posts
-            |> Seq.map renderPost
-            |> String.concat ""
-        }
+<div class="index-main">
+    <div class="lang-selector">
+        {languageSelector} / <a href="/">All languages</a>
+        </div>
+
+        <div class="post-list">
+        <div>
+            { posts
+                |> Seq.map renderPost
+                |> String.concat ""
+            }
+        </div>
     </div>
+
 </div>
     """ ["/assets/index.css"]
 
