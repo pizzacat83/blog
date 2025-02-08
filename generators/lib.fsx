@@ -18,6 +18,7 @@ let websocketScript =
     {
     console.log('closing');
     websocket.close();
+    document.location.reload();
     }
     window.addEventListener("load", init, false);
     </script>
