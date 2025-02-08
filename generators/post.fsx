@@ -39,11 +39,6 @@ let layout (post: Lib.LocalizedPost) =
 </article>
     """ ["/assets/post.css"]
 
-type Post = {
-    language: Postloader.Language
-    html: string
-}
-
 let langCode = function
     | Postloader.English -> "en"
     | Postloader.Japanese -> "ja"
