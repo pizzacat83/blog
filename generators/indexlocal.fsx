@@ -21,7 +21,7 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
         Lib.getLocalizedPosts ctx language
         |> Seq.sortByDescending (fun p -> p.published)
 
-    Lib.layout language "pizzacat83's blog" $"""
+    Lib.layout (Some language) "pizzacat83's blog" $"""
 <div class="post-list">
     <div>
         { posts

@@ -30,7 +30,12 @@ let topPath (language: Postloader.Language) =
     | Postloader.Japanese -> "ja"
 
 
-let layout (language: Postloader.Language) (title: string) (children: string) (spreadsheets: string list) =
+let layout (language: Postloader.Language option) (title: string) (children: string) (spreadsheets: string list) =
+    let logoHref =
+        match language with
+        | Some lang -> $"/{topPath lang}"
+        | None -> "/"
+    
     $"""
 <!DOCTYPE html>
 <html lang="en">
@@ -54,7 +59,7 @@ let layout (language: Postloader.Language) (title: string) (children: string) (s
 <header>
 <nav>
     <div class="blog-title">
-        <a href="/{topPath language}">pizzacat83's blog</a>
+        <a href="{logoHref}">pizzacat83's blog</a>
     </div>
     <div>
         <a href="https://pizzacat83.com">About</a>

@@ -24,11 +24,9 @@ let websocketScript =
 
 
 let layout (post: Lib.LocalizedPost) =
-    let language = post.language
-
     let published = post.published.ToString("yyyy-MM-dd")
 
-    Lib.layout language post.title $"""
+    Lib.layout (Some post.language) post.title $"""
 <article>   
 
 <header>
