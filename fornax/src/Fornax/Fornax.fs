@@ -112,7 +112,6 @@ let getWebServerConfig port =
 let router basePath =
     let pubdir = Path.Combine(basePath, "_public")
     choose [
-        path "/" >=> Redirection.redirect "/index.html"
         Files.browse pubdir
         path "/websocket" >=> handShake ws
         (fun ctx ->
