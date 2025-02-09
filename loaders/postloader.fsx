@@ -183,6 +183,7 @@ let loadPost (dirpath: string): Result<Post, string> =
 let loader (projectRoot: string) (siteContent: SiteContents) =
     let postsPath = Path.Combine(projectRoot, contentDir)
     Directory.GetDirectories(postsPath)
+    |> Array.filter (fun n -> Path.GetFileName n <> ".obsidian")
     |> Array.iter (fun n ->
         match loadPost n with
         | Ok post -> siteContent.Add(post)
