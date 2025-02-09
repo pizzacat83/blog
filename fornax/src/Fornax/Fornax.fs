@@ -182,7 +182,8 @@ let main argv =
                         fragment = "_public" ||     
                         fragment = ".sass-cache" ||    
                         fragment = ".git" ||           
-                        fragment = ".ionide")
+                        fragment = ".ionide" ||
+                        fragment = ".obsidian")
                     |> not)
                     // TODO: make it configurable?
                     && pathDirectories[0] <> "fornax"
