@@ -6,6 +6,7 @@
 
 open System.IO
 open FsToolkit.ErrorHandling
+open FSharp.Formatting.Markdown
 
 type Language = English | Japanese
 let languages = [English; Japanese]
@@ -99,6 +100,45 @@ let readFile (path: string): string option =
     with
     | e -> None
 
+let parseSource (lang:  Language) (source: string): Result<ParsedSource, string> =
+    result {
+        let doc = Markdown.Parse (source, ?parseOptions=Some MarkdownParseOptions.AllowYamlFrontMatter)
+
+        let! frontmatter =
+            doc.Paragraphs
+            |> List.tryPick (function YamlFrontmatter(fm, _) -> Some(fm) | _ -> None)
+            |> Option.map (String.concat "\n")
+            |> Option.either Ok (fun () -> Error "Missing frontmatter")
+            |> Result.map parseFrontMatter
+
+        let! title =
+            doc.Paragraphs
+            |> List.tryPick (function Heading(1, t, _) -> Some(t) | _ -> None)
+            |> Option.either Ok (fun () -> Error "Missing h1")
+        let! title = 
+            match List.tryHead title with
+            | Some(Literal(l, _)) -> Ok l
+            | _ -> Error (sprintf "Unsupported title contents: %A" title)
+    
+        let body = Markdown.ToHtml (MarkdownDocument(
+            doc.Paragraphs
+            |> List.filter (
+                function
+                | YamlFrontmatter _ -> false
+                | Heading(1, _, _) -> false
+                | _ -> true
+            ),
+            doc.DefinedLinks
+        ))
+
+        return! Ok {
+            language = lang
+            frontmatter = frontmatter
+            title = title
+            body = body
+        }
+    }
+
 let loadPost (dirpath: string): Result<Post, string> =
     let key =
         dirpath
@@ -114,23 +154,7 @@ let loadPost (dirpath: string): Result<Post, string> =
                 readFile path |> Option.map (fun s -> (lang, s))
             )
             |> List.traverseResultA (fun (lang, source) -> 
-                result {
-                    let source = splitMarkdown source
-                    let! frontmatter =
-                        source.frontmatter
-                        |> Option.map parseFrontMatter
-                        |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
-
-                    let body = FSharp.Formatting.Markdown.Markdown.Parse (source.body, ?parseOptions=Some FSharp.Formatting.Markdown.MarkdownParseOptions.AllowYamlFrontMatter)
-                    let body = FSharp.Formatting.Markdown.Markdown.ToHtml(body)
-
-                    return! Ok {
-                        language = lang
-                        frontmatter = frontmatter
-                        title = source.title
-                        body = body
-                    }
-                } |> Result.mapError (sprintf "Failed to parse post %A: %s" lang)
+                parseSource lang source |> Result.mapError (sprintf "Failed to parse post %A: %s" lang)
             )
             |> Result.mapError (String.concat "; ")
 
