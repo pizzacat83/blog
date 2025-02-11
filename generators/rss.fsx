@@ -1,5 +1,5 @@
 
-#r "../_lib/Fornax.Core.dll"
+#r "../fornax/src/Fornax.Core/bin/Release/net8.0/Fornax.Core.dll"
 #load "lib.fsx"
 
 let renderPost (post: Lib.LocalizedPost) =

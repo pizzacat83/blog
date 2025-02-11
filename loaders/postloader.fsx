@@ -1,4 +1,4 @@
-#r "../_lib/Fornax.Core.dll"
+#r "../fornax/src/Fornax.Core/bin/Release/net8.0/Fornax.Core.dll"
 #r "../_lib/Markdig.dll"
 #r "../packages/YamlDotNet/lib/netstandard2.0/YamlDotNet.dll"
 #r "../packages/FsToolkit.ErrorHandling/lib/netstandard2.0/FsToolkit.ErrorHandling.dll"
