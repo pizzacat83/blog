@@ -1,10 +1,10 @@
 #r "../fornax/src/Fornax.Core/bin/Release/net8.0/Fornax.Core.dll"
-#r "../_lib/Markdig.dll"
+#r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Common.dll"
+#r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Markdown.dll"
 #r "../packages/YamlDotNet/lib/netstandard2.0/YamlDotNet.dll"
 #r "../packages/FsToolkit.ErrorHandling/lib/netstandard2.0/FsToolkit.ErrorHandling.dll"
 
 open System.IO
-open Markdig
 open FsToolkit.ErrorHandling
 
 type Language = English | Japanese
@@ -28,13 +28,6 @@ type Post = {
 type PostConfig = {
     disableLiveRefresh: bool
 }
-
-let markdownPipeline =
-    MarkdownPipelineBuilder()
-        .UsePipeTables()
-        .UseGridTables()
-        .UseYamlFrontMatter()
-        .Build()
 
 type SegmentedSource = {
     frontmatter: string option
@@ -71,9 +64,6 @@ let splitMarkdown (markdown: string): SegmentedSource  =
         body = body
     }
 
-let renderMarkdown (markdown: string) =
-    Markdown.ToHtml(markdown, markdownPipeline)
-
 let contentDir = "posts"
 
 type FrontMatter = {
@@ -109,22 +99,6 @@ let readFile (path: string): string option =
     with
     | e -> None
 
-let parseSource (language: Language) (source: string): Result<ParsedSource, string> =
-    result {
-        let source = splitMarkdown source
-        let! frontmatter =
-            source.frontmatter
-            |> Option.map parseFrontMatter
-            |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
-
-        return! Ok {
-            language = English
-            frontmatter = frontmatter
-            title = source.title
-            body = renderMarkdown source.body
-        }
-    }
-
 let loadPost (dirpath: string): Result<Post, string> =
     let key =
         dirpath
@@ -147,11 +121,14 @@ let loadPost (dirpath: string): Result<Post, string> =
                         |> Option.map parseFrontMatter
                         |> Option.either Ok (fun _ -> Error "Failed to parse frontmatter")
 
+                    let body = FSharp.Formatting.Markdown.Markdown.Parse (source.body, ?parseOptions=Some FSharp.Formatting.Markdown.MarkdownParseOptions.AllowYamlFrontMatter)
+                    let body = FSharp.Formatting.Markdown.Markdown.ToHtml(body)
+
                     return! Ok {
                         language = lang
                         frontmatter = frontmatter
                         title = source.title
-                        body = renderMarkdown source.body
+                        body = body
                     }
                 } |> Result.mapError (sprintf "Failed to parse post %A: %s" lang)
             )

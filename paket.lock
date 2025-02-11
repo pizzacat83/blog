@@ -13,6 +13,8 @@ NUGET
       System.Reflection.Metadata (>= 8.0) - restriction: >= netstandard2.0
       System.Runtime.CompilerServices.Unsafe (>= 6.0) - restriction: >= netstandard2.0
     FSharp.Core (9.0.101) - content: none
+    FSharp.Formatting (14.0.1)
+      FSharp.Compiler.Service (>= 40.0) - restriction: >= netstandard2.1
     FSharp.Quotations.Evaluator (2.1)
       FSharp.Core (>= 4.3.1) - restriction: >= netstandard2.0
     FsToolkit.ErrorHandling (4.18)
