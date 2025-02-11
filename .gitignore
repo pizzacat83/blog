@@ -5,3 +5,4 @@ bin/
 obj/
 nupkg/
 Paket.Restore.targets
+.obsidian
