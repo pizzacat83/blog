@@ -95,6 +95,7 @@ struct HelloTemplate<'a> {
 
 Rust 言語との統合性を軸にさらに調べると、[maud](https://maud.lambda.xyz/) というテンプレートエンジンを見つけた。
 
+しかし、TSX が恋しい！脱線するが、TSX の開発体験は感動的だ。HTML と TypeScript を書き慣れていれば、いつも通り HTML や TS を書くだけで、望みの処理を実装できる。追加で覚えるべき文法は極めて少ない。そしてコード補完や型検査など、TS で使える強力なエディタ支援機能は TSX でも同様に使える。さらに、TS の型消去ベースのトランスパイルや hot loading 等の技術のおかげで、コードを保存すると即座にレンダリング結果を確認できる。
 
 
 ## そして出会った scriptable SSG using F#: Fornax
