@@ -41,6 +41,7 @@ let layout (post: Lib.LocalizedPost) =
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css" integrity="sha512-hasIneQUHlh06VNBe7f6ZcHmeRTLIaQWFd43YriJ0UND19bvYRauxthDg8E4eVNPm9bRUhr5JGeqH7FRFXQu5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" integrity="sha512-EBLzUL8XLl+va/zAsmXwS7Z2B1F9HUHkZwyS/VKwh3S7T/U0nF4BaU29EP/ZSf6zgiIxYAnKLu6bJ8dqpmX5uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/fsharp.min.js" integrity="sha512-S3tgSOL0xKKsqOdbPP7AZKtb/L0bXVG/PW7RNRVXOqCWEiBRzIq9oTIinLoY11MB58l1/f++IHM+mp1Nfk2ETA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>hljs.highlightAll();</script>
     """ ["/assets/post.css"]
 
