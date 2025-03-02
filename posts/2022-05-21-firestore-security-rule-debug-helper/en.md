@@ -1,8 +1,7 @@
 ---
 published: 2022-05-21
 summary: |-
-  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Esse quis dolor animi nostrum reprehenderit nihil nulla magni aperiam rem.
-  Facere aliquam tenetur voluptatem officiis porro rerum mollitia ratione provident id.
+  Debugging Firestore security rules can be tricky. This article introduces a custom assert function that logs meaningful messages, making it easier to identify why a request is denied.
 ---
 
 # A Useful Custom Function to Debug Firestore Security Rules
