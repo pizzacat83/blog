@@ -36,7 +36,7 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
         )
         |> String.concat " / "
 
-    Lib.layout (Some language) "pizzacat83's blog" $"""
+    Lib.layout (Some language) "pizzacat83's blog" None $"""
 <div class="index-main">
     <div class="lang-filter">
         <a href="/">All languages</a> / {languageFilter}
@@ -52,7 +52,7 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
     </div>
 
 </div>
-    """ ["/assets/index.css"]
+    """ ["/assets/index.css"] "" ""
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string): list<string * string> =
     Postloader.languages

@@ -2,6 +2,7 @@
 #load "lib.fsx"
 
 open Lib
+open System.Net
 
 let websocketScript =
     RawHtml """
@@ -25,8 +26,9 @@ let websocketScript =
 
 let layout (post: Lib.LocalizedPost) =
     let published = post.published.ToString("yyyy-MM-dd")
+    let url = $"https://blog.pizzacat83.com{Lib.postHref post.language post.key}"
 
-    Lib.layout (Some post.language) post.title $"""
+    Lib.layout (Some post.language) post.title  (Some post.summary)$"""
 <article>   
 
 <header>
@@ -43,7 +45,14 @@ let layout (post: Lib.LocalizedPost) =
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js" integrity="sha512-EBLzUL8XLl+va/zAsmXwS7Z2B1F9HUHkZwyS/VKwh3S7T/U0nF4BaU29EP/ZSf6zgiIxYAnKLu6bJ8dqpmX5uw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/fsharp.min.js" integrity="sha512-S3tgSOL0xKKsqOdbPP7AZKtb/L0bXVG/PW7RNRVXOqCWEiBRzIq9oTIinLoY11MB58l1/f++IHM+mp1Nfk2ETA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>hljs.highlightAll();</script>
-    """ ["/assets/post.css"]
+    """ ["/assets/post.css"] $"""
+<meta property="og:title" content="{post.title |> WebUtility.HtmlEncode}" />
+<meta property="og:description" content="{post.summary |> WebUtility.HtmlEncode}" />
+<meta property="og:site_name" content="article" />
+<meta property="og:type" content="pizzacat83's blog" />
+<meta property="og:url" content="{url}" />
+<meta property="article:published_time" content="{published}" />
+    """ "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
 
 let langCode = function
     | Postloader.English -> "en"

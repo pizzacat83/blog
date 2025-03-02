@@ -22,7 +22,7 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
         Lib.getPrimaryLocalizedPosts ctx
         |> Seq.sortByDescending (fun p -> p.published)
 
-    Lib.layout None "pizzacat83's blog" $"""
+    Lib.layout None "pizzacat83's blog" None $"""
 <div class="index-main">
     <div class="lang-filter">
     All languages / <a href="/en">English</a> / <a href="/ja">日本語</a>
@@ -38,5 +38,5 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
     </div>
 
 </div>
-    """ ["/assets/index.css"]
+    """ ["/assets/index.css"] "" ""
     

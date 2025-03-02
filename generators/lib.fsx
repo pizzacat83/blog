@@ -2,6 +2,8 @@
 #load "../loaders/postloader.fsx"
 #endif
 
+open System.Net
+
 type RawHtml = RawHtml of string
 
 // TODO: fornax should provide this value as arguments, not directives
@@ -38,19 +40,26 @@ let topPath (language: Postloader.Language) =
     | Postloader.Japanese -> "ja"
 
 
-let layout (language: Postloader.Language option) (title: string) (children: string) (stylesheets: string list) =
+let layout (language: Postloader.Language option) (title: string) (description: string option) (children: string) (stylesheets: string list) (head: string) (head_prefix: string) =
     let logoHref =
         match language with
         | Some lang -> $"/{topPath lang}"
         | None -> "/"
     
+    let meta_description =
+        description
+        |> Option.map (fun d -> $"""<meta name="description" content="{d |> WebUtility.HtmlEncode}">""")
+        |> Option.defaultValue ""
+
     $"""
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head prefix="{head_prefix}">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{title}</title>
+{meta_description}
+{head}
 
 <link rel="stylesheet" href="/assets/style.css">
 {
