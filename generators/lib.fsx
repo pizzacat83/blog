@@ -58,7 +58,7 @@ let layout (language: Postloader.Language option) (title: string) (children: str
     |> List.map (fun s -> sprintf "<link rel=\"stylesheet\" href=\"%s\">" s)
     |> String.concat "\n"
 }
-<link rel="alternate" type="application/rss+xml" title="posts" href="/rss">
+<link rel="alternate" type="application/rss+xml" title="posts" href="/rss.xml">
 
 {if is_watch then websocketScript |> (fun (RawHtml x) -> x) else ""}
 </head>
