@@ -476,6 +476,18 @@ let internal invokeFunction (f : obj) (args : obj seq) =
 
 なんとなくリフレクションを使って関数を適用していることがわかる。`invokeFunction` は `obj option` を返すので、`Option.bind (tryUnbox<string>)` のようにして具体的な型にキャストできる。
 
+驚いたのは、Fornax 本体と F# スクリプトの間でオブジェクトがやり取りされていることである。Fornax は F# スクリプトをロードして取り出した `generate` 関数に対し、`siteContent` などのオブジェクトを渡している。これはプリミティブではなく、クラス `Fornax.Core.Model.SiteContents` のインスタンスである。そして F# スクリプト内では、引数 `siteContent` の `GetValues` をはじめとするメソッドを普通に呼び出せる。
+
+```fsharp
+let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
+    ctx.TryGetValues<Postloader.Post> ()
+        |> Option.defaultValue Seq.empty
+        |> Seq.map (fun (post) ->
+            // ...
+```
+
+さらに、この `generate` 関数の返り値を Fornax 本体が受け取ってサイトを出力する。このように、コンパイルされたプログラムとスクリプトの間で、共通の型定義に沿って双方向的にオブジェクトをやり取りでき、メソッドの呼び出しもできるというのは、私にとっては新鮮な体験だった。このような仕組みは静的サイトジェネレータに限らず scriptable なソフトウェアを作る際の強力な武器になると思う。
+
 ### Fornax の実装をいじる
 
 Fornax の内部的な仕組みがざっくり掴めたところで、Fornax について感じていた改善点に手をつけていく。
