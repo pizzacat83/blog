@@ -8,6 +8,10 @@ article {
         margin-bottom: 1em;
     }
 
+    ul ul {
+        margin-bottom: 0;
+    }
+
     & > header {
         time {
             font-size: 0.9rem;
@@ -46,4 +50,7 @@ article {
         margin-bottom: 0.5rem;
     }
     
+    pre {
+        white-space: pre-wrap;
+    }
 }
