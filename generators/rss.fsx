@@ -26,7 +26,6 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
         <title>pizzacat83's blog</title>
         <link>https://blog.pizzacat83.com</link>
         <description></description>
-        <language>en-us</language>
         { posts
             |> Seq.map renderPost
             |> String.concat ""
