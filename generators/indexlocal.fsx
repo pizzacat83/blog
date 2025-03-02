@@ -18,6 +18,8 @@ let renderPost (post: Lib.LocalizedPost) =
     """
 
 let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.Language)=
+    let url = $"https://blog.pizzacat83.com/{Lib.topPath language}"
+
     let posts =
         Lib.getLocalizedPosts ctx language
         |> Seq.sortByDescending (fun p -> p.published)
@@ -52,7 +54,14 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
     </div>
 
 </div>
-    """ ["/assets/index.css"] "" ""
+    """ ["/assets/index.css"] $"""
+<meta property="og:title" content="pizzacat83's blog" />
+<meta property="og:site_name" content="pizzacat83's blog" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="{url}" />
+
+<link rel="canonical" href="{url}">
+    """ "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string): list<string * string> =
     Postloader.languages

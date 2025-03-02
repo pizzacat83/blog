@@ -48,10 +48,12 @@ let layout (post: Lib.LocalizedPost) =
     """ ["/assets/post.css"] $"""
 <meta property="og:title" content="{post.title |> WebUtility.HtmlEncode}" />
 <meta property="og:description" content="{post.summary |> WebUtility.HtmlEncode}" />
-<meta property="og:site_name" content="article" />
-<meta property="og:type" content="pizzacat83's blog" />
+<meta property="og:site_name" content="pizzacat83's blog" />
+<meta property="og:type" content="article" />
 <meta property="og:url" content="{url}" />
 <meta property="article:published_time" content="{published}" />
+
+<link rel="canonical" href="{url}">
     """ "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
 
 let langCode = function
