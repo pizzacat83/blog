@@ -4,6 +4,14 @@
 
 type RawHtml = RawHtml of string
 
+// TODO: fornax should provide this value as arguments, not directives
+let is_watch =
+#if WATCH
+    true
+#else
+    false
+#endif
+
 
 let websocketScript =
     RawHtml """
@@ -52,7 +60,7 @@ let layout (language: Postloader.Language option) (title: string) (children: str
 }
 <link rel="alternate" type="application/rss+xml" title="posts" href="/rss">
 
-{websocketScript |> (fun (RawHtml x) -> x)}
+{if is_watch then websocketScript |> (fun (RawHtml x) -> x) else ""}
 </head>
 <body>
 
