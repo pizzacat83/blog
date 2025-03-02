@@ -38,7 +38,7 @@ let topPath (language: Postloader.Language) =
     | Postloader.Japanese -> "ja"
 
 
-let layout (language: Postloader.Language option) (title: string) (children: string) (spreadsheets: string list) =
+let layout (language: Postloader.Language option) (title: string) (children: string) (stylesheets: string list) =
     let logoHref =
         match language with
         | Some lang -> $"/{topPath lang}"
@@ -54,7 +54,7 @@ let layout (language: Postloader.Language option) (title: string) (children: str
 
 <link rel="stylesheet" href="/assets/style.css">
 {
-    spreadsheets
+    stylesheets
     |> List.map (fun s -> sprintf "<link rel=\"stylesheet\" href=\"%s\">" s)
     |> String.concat "\n"
 }
