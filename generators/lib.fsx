@@ -106,6 +106,8 @@ type LocalizedPost = {
     summary: string
     body: string
 
+    assets: Postloader.Asset list
+
     head: string option
 }
 
@@ -123,6 +125,8 @@ let getLocalizedPosts (ctx: SiteContents) (language: Postloader.Language): Local
                 title = content.title
                 summary = content.summary
                 body = content.body
+
+                assets = content.assets
 
                 head = content.head
             }
@@ -147,6 +151,8 @@ let getPrimaryLocalizedPosts (ctx: SiteContents): LocalizedPost seq =
             title = content.title
             summary = content.summary
             body = content.body
+
+            assets = content.assets
 
             head = content.head
         }: LocalizedPost

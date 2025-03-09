@@ -13,11 +13,18 @@ let languages = [English; Japanese]
 
 type PostKey = PostKey of string
 
+type Asset = {
+    filename: string
+    content: byte[]
+}
+
 type Content = {
     language: Language
     title: string
     summary: string
     body: string
+
+    assets: Asset list
 
     head: string option
 }
@@ -144,6 +151,20 @@ let parseSource (lang:  Language) (source: string): Result<ParsedSource, string>
         }
     }
 
+let loadAssets (dirpath: string): Asset list =
+    Directory.GetFiles(dirpath)
+    |> Array.filter (fun n -> 
+        let ext = Path.GetExtension n
+        ext = ".png" || ext = ".jpg" || ext = ".jpeg" || ext = ".gif" || ext = ".svg"
+    )
+    |> Array.map (fun n ->
+        {
+            filename = Path.GetFileName n
+            content = File.ReadAllBytes n
+        }
+    )
+    |> Array.toList
+
 let loadPost (dirpath: string): Result<Post, string> =
     let key =
         dirpath
@@ -168,6 +189,8 @@ let loadPost (dirpath: string): Result<Post, string> =
 
         let published = sources[0].frontmatter.published
 
+        let assets = loadAssets dirpath
+
         let contents: Content list =
             sources
             |> List.map (fun source ->
@@ -176,6 +199,8 @@ let loadPost (dirpath: string): Result<Post, string> =
                     title = source.title
                     summary = source.frontmatter.summary
                     body = source.body
+
+                    assets = assets
 
                     head = source.frontmatter.head
                 }

@@ -62,18 +62,27 @@ let langCode = function
     | Postloader.English -> "en"
     | Postloader.Japanese -> "ja"
 
-let generate' (ctx : SiteContents) (language: Postloader.Language): (string * string) seq =
+let generate' (ctx : SiteContents) (language: Postloader.Language): (string * byte[]) seq =
     let posts =
         Lib.getLocalizedPosts ctx language
     
-    posts
-    |> Seq.map (fun post ->
-            let html = layout post
-            let filename = sprintf "%s/posts/%s/index.html" (langCode  post.language) (post.key |> fun (Postloader.PostKey k) -> k) in
-            (filename, html)
-    )
+    Seq.append
+        (posts
+        |> Seq.map (fun post ->
+                let html = layout post
+                let filename = sprintf "%s/posts/%s/index.html" (langCode  post.language) (post.key |> fun (Postloader.PostKey k) -> k) in
+                filename, html |> System.Text.Encoding.UTF8.GetBytes
+        ))
+        (posts
+        |> Seq.collect (fun post ->
+            post.assets
+            |> Seq.map (fun asset ->
+                let filename = sprintf "%s/posts/%s/%s" (langCode post.language) (post.key |> fun (Postloader.PostKey k) -> k) asset.filename
+                filename, asset.content
+            )
+        ))
 
-let generate (ctx : SiteContents) (projectRoot: string) (_): list<string * string> =
+let generate (ctx : SiteContents) (projectRoot: string) (_): list<string * byte[]> =
     Postloader.languages
     |> List.map (generate' ctx)
     |> Seq.concat
