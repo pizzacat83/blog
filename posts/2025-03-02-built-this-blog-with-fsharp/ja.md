@@ -1,6 +1,9 @@
 ---
 published: 2025-03-02
 summary: このブログを構築する過程の紆余曲折を綴ります。
+head: |
+  <meta property="og:image" content="https://blog.pizzacat83.com/ja/posts/2025-03-02-built-this-blog-with-fsharp/fornax_components.png">
+  <meta name="twitter:card" content="summary_large_image">
 ---
 # F# でこのブログを構築した
 

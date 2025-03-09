@@ -54,6 +54,8 @@ let layout (post: Lib.LocalizedPost) =
 <meta property="article:published_time" content="{published}" />
 
 <link rel="canonical" href="{url}">
+
+{post.head |> Option.defaultValue ""}
     """ "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
 
 let langCode = function

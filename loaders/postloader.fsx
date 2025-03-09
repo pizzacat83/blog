@@ -18,6 +18,8 @@ type Content = {
     title: string
     summary: string
     body: string
+
+    head: string option
 }
 
 type Post = {
@@ -70,12 +72,14 @@ let contentDir = "posts"
 type FrontMatter = {
     published: System.DateOnly
     summary: string
+    head: string option
 }
 
 [<CLIMutable>]
 type FrontMatterSerialized = {
     published: string
     summary: string
+    head: string option
 }
 
 let parseFrontMatter (frontmatter: string): FrontMatter =
@@ -85,6 +89,7 @@ let parseFrontMatter (frontmatter: string): FrontMatter =
     {
         published = System.DateOnly.Parse(fm.published)
         summary = fm.summary
+        head = fm.head
     }
 
 type ParsedSource = {
@@ -171,6 +176,8 @@ let loadPost (dirpath: string): Result<Post, string> =
                     title = source.title
                     summary = source.frontmatter.summary
                     body = source.body
+
+                    head = source.frontmatter.head
                 }
             )
 
