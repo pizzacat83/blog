@@ -8,6 +8,15 @@ open System.IO
 open FsToolkit.ErrorHandling
 open FSharp.Formatting.Markdown
 
+// TODO: fornax should provide this value as arguments, not directives
+let isWatch =
+#if WATCH
+    true
+#else
+    false
+#endif
+
+
 type Language = English | Japanese
 let languages = [English; Japanese]
 
@@ -77,6 +86,7 @@ let splitMarkdown (markdown: string): SegmentedSource  =
 let contentDir = "posts"
 
 type FrontMatter = {
+    draft: bool
     published: System.DateOnly
     summary: string
     head: string option
@@ -84,6 +94,7 @@ type FrontMatter = {
 
 [<CLIMutable>]
 type FrontMatterSerialized = {
+    draft: bool option
     published: string
     summary: string
     head: string option
@@ -94,6 +105,7 @@ let parseFrontMatter (frontmatter: string): FrontMatter =
     let fm = yaml.Deserialize<FrontMatterSerialized> frontmatter
 
     {
+        draft = fm.draft |> Option.defaultValue false
         published = System.DateOnly.Parse(fm.published)
         summary = fm.summary
         head = fm.head
@@ -165,7 +177,7 @@ let loadAssets (dirpath: string): Asset list =
     )
     |> Array.toList
 
-let loadPost (dirpath: string): Result<Post, string> =
+let loadPost (dirpath: string): Result<Post option, string> =
     let key =
         dirpath
         |> Path.GetFileName
@@ -184,33 +196,43 @@ let loadPost (dirpath: string): Result<Post, string> =
             )
             |> Result.mapError (String.concat "; ")
 
-        if List.isEmpty sources then
-            return! Error "No post sources found"
+        // filter out drafts when `fornax build`
+        let sources =
+            if isWatch
+            then sources
+            else sources |> List.filter (fun s -> not s.frontmatter.draft)
 
-        let published = sources[0].frontmatter.published
+        let post = option {
+            if List.isEmpty sources then
+                return! None
 
-        let assets = loadAssets dirpath
+            let published = sources[0].frontmatter.published
 
-        let contents: Content list =
-            sources
-            |> List.map (fun source ->
-                {
-                    language = source.language
-                    title = source.title
-                    summary = source.frontmatter.summary
-                    body = source.body
+            let assets = loadAssets dirpath
 
-                    assets = assets
+            let contents: Content list =
+                sources
+                |> List.map (fun source ->
+                    {
+                        language = source.language
+                        title = source.title
+                        summary = source.frontmatter.summary
+                        body = source.body
 
-                    head = source.frontmatter.head
-                }
-            )
+                        assets = assets
 
-        return! Ok {
-            key = key
-            published = published
-            contents = contents
+                        head = source.frontmatter.head
+                    }
+                )
+
+            return! {
+                key = key
+                published = published
+                contents = contents
+            } |> Some
         }
+
+        return! Ok post
     }
 
 let loader (projectRoot: string) (siteContent: SiteContents) =
@@ -219,7 +241,8 @@ let loader (projectRoot: string) (siteContent: SiteContents) =
     |> Array.filter (fun n -> Path.GetFileName n <> ".obsidian")
     |> Array.iter (fun n ->
         match loadPost n with
-        | Ok post -> siteContent.Add(post)
+        | Ok (Some post) -> siteContent.Add(post)
+        | Ok None -> ()
         | Error err -> siteContent.AddError({ Path = n; Message = err; Phase = Loading })
     )
 
