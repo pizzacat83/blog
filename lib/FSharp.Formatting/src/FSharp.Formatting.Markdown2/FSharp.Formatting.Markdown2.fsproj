@@ -8,6 +8,7 @@
     <Compile Include="Collections.fs" />
     <Compile Include="StringParsing.fs" />
     <Compile Include="HtmlFormatting.fs" />
+    <Compile Include="Markdown.fs" />
   </ItemGroup>
   <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
 </Project>
