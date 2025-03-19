@@ -1,4 +1,5 @@
-﻿// --------------------------------------------------------------------------------------
+﻿// Modified by pizzacat83
+// --------------------------------------------------------------------------------------
 // F# Markdown (HtmlFormatting.fs)
 // (c) Tomas Petricek, 2012, Available under Apache 2.0 license.
 // --------------------------------------------------------------------------------------
@@ -11,7 +12,6 @@ open System.Collections.Generic
 open System.Text.RegularExpressions
 open FSharp.Patterns
 open FSharp.Collections
-open MarkdownUtils
 
 // --------------------------------------------------------------------------------------
 // Formats Markdown documents as an HTML file
@@ -198,12 +198,6 @@ let rec internal formatParagraph (ctx: FormattingContext) paragraph =
         ctx.Writer.Write("</p>")
     | HorizontalRule _ -> ctx.Writer.Write("<hr />")
     | CodeBlock(code, _, _fence, language, _, _) ->
-        let code =
-            if language = "fsharp" then
-                adjustFsxCodeForConditionalDefines (ctx.DefineSymbol, ctx.Newline) code
-            else
-                code
-
         if ctx.WrapCodeSnippets then
             ctx.Writer.Write("<table class=\"pre\"><tr><td>")
 
@@ -343,16 +337,6 @@ and internal formatParagraphs ctx paragraphs =
 /// a specified TextWriter. Parameters specify newline character
 /// and a dictionary with link keys defined in the document.
 let formatAsHtml writer generateAnchors wrap links substitutions newline crefResolver mdlinkResolver paragraphs =
-    let ctx =
-        { Links = links
-          Substitutions = substitutions
-          Newline = newline
-          CodeReferenceResolver = crefResolver
-          MarkdownDirectLinkResolver = mdlinkResolver
-          DefineSymbol = "HTML" }
-
-    let paragraphs = applySubstitutionsInMarkdown ctx paragraphs
-
     formatParagraphs
         { Writer = writer
           Links = links
