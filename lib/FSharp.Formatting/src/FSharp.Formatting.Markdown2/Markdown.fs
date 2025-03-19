@@ -4,17 +4,17 @@
 // (c) Tomas Petricek, 2012, Available under Apache 2.0 license.
 // --------------------------------------------------------------------------------------
 
-namespace FSharp.Formatting.Markdown
+namespace FSharp.Formatting.Markdown2
 
 open System
 open System.IO
 
 /// Static class that provides methods for formatting
 /// and transforming Markdown documents.
-type Markdown internal () =
+type Markdown2 internal () =
     /// Transform the provided MarkdownDocument into HTML
     /// format and write the result to a given writer.
-    static member WriteHtml2(doc: MarkdownDocument, writer, ?newline) =
+    static member WriteHtml(doc: FSharp.Formatting.Markdown.MarkdownDocument, writer, ?newline) =
         let newline = defaultArg newline Environment.NewLine
 
         HtmlFormatting.formatAsHtml
@@ -27,15 +27,15 @@ type Markdown internal () =
 
     /// Transform Markdown text into HTML format. The result
     /// will be written to the provided TextWriter.
-    static member WriteHtml2
+    static member WriteHtml
         (
             markdownText: string,
             writer: TextWriter,
             ?newline
         ) =
-        let doc = Markdown.Parse(markdownText, ?newline = newline)
+        let doc = FSharp.Formatting.Markdown.Markdown.Parse(markdownText, ?newline = newline)
 
-        Markdown.WriteHtml2(
+        Markdown2.WriteHtml(
             doc,
             writer,
             ?newline = newline
@@ -43,11 +43,11 @@ type Markdown internal () =
 
     /// Transform the provided MarkdownDocument into HTML
     /// format and return the result as a string.
-    static member ToHtml2(doc: MarkdownDocument, ?newline) =
+    static member ToHtml(doc: FSharp.Formatting.Markdown.MarkdownDocument, ?newline) =
         let sb = new System.Text.StringBuilder()
         use wr = new StringWriter(sb)
 
-        Markdown.WriteHtml2(
+        Markdown2.WriteHtml(
             doc,
             wr,
             ?newline = newline
@@ -57,10 +57,10 @@ type Markdown internal () =
 
     /// Transform Markdown document into HTML format.
     /// The result will be returned as a string.
-    static member ToHtml2(markdownText: string, ?newline) =
-        let doc = Markdown.Parse(markdownText, ?newline = newline)
+    static member ToHtml(markdownText: string, ?newline) =
+        let doc = FSharp.Formatting.Markdown.Markdown.Parse(markdownText, ?newline = newline)
 
-        Markdown.ToHtml2(
+        Markdown2.ToHtml(
             doc,
             ?newline = newline
         )

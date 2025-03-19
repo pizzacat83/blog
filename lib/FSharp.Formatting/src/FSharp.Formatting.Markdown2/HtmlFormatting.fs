@@ -4,13 +4,14 @@
 // (c) Tomas Petricek, 2012, Available under Apache 2.0 license.
 // --------------------------------------------------------------------------------------
 
-module FSharp.Formatting.Markdown.HtmlFormatting
+module FSharp.Formatting.Markdown2.HtmlFormatting
 
 open System
 open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open FSharp.Collections
+open FSharp.Formatting.Markdown
 
 // --------------------------------------------------------------------------------------
 // Formats Markdown documents as an HTML file
