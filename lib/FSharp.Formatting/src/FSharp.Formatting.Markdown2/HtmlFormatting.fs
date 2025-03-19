@@ -10,7 +10,6 @@ open System
 open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
-open FSharp.Patterns
 open FSharp.Collections
 
 // --------------------------------------------------------------------------------------
@@ -336,7 +335,7 @@ and internal formatParagraphs ctx paragraphs =
 /// Format Markdown document and write the result to
 /// a specified TextWriter. Parameters specify newline character
 /// and a dictionary with link keys defined in the document.
-let formatAsHtml writer generateAnchors wrap links substitutions newline crefResolver mdlinkResolver paragraphs =
+let formatAsHtml writer generateAnchors wrap links newline paragraphs =
     formatParagraphs
         { Writer = writer
           Links = links
