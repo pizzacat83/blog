@@ -58,7 +58,8 @@ type internal FormattingContext =
       GenerateHeaderAnchors: bool
       UniqueNameGenerator: UniqueNameGenerator
       ParagraphIndent: unit -> unit
-      DefineSymbol: string }
+      DefineSymbol: string
+      Footnotes: Dictionary<string, string * MarkdownSpans> }
 
 let internal bigBreak (ctx: FormattingContext) () = ctx.Writer.Write(ctx.Newline)
 
@@ -80,6 +81,23 @@ let rec internal formatSpan (ctx: FormattingContext) span =
     | EmbedSpans(cmd, _) -> formatSpans ctx (cmd.Render())
     | Literal(str, _) -> ctx.Writer.Write(str)
     | HardLineBreak(_) -> ctx.Writer.Write("<br />" + ctx.Newline)
+    | IndirectLink(body, _, key, _) when key.StartsWith("^") ->
+        // Process footnote reference
+        let footnoteId = if key.StartsWith("^") then key.Substring(1) else key
+        let index = 
+            if ctx.Footnotes.ContainsKey(footnoteId) then
+                ctx.Footnotes.Count
+            else
+                // Store the footnote content for later rendering
+                match ctx.Links.TryGetValue(key) with
+                | true, (content, _) -> 
+                    // Content is the footnote text from the markdown
+                    ctx.Footnotes.Add(footnoteId, (content, body))
+                | _ -> ()
+                ctx.Footnotes.Count
+
+        // Render the footnote reference as a superscript with link
+        ctx.Writer.Write(sprintf "<sup class=\"footnote-ref\"><a href=\"#fn%d\" id=\"fnref%d\">[%d]</a></sup>" index index index)    
     | IndirectLink(body, _, LookupKey ctx.Links (link, title), _)
     | DirectLink(body, link, title, _) ->
         ctx.Writer.Write("<a href=\"")
@@ -159,6 +177,34 @@ let internal formatAnchor (ctx: FormattingContext) (spans: MarkdownSpans) =
     |> String.concat "-"
     |> fun name -> if String.IsNullOrWhiteSpace name then "header" else name
     |> ctx.UniqueNameGenerator.GetName
+
+// Render footnotes section at the end of the document
+let internal renderFootnotes (ctx: FormattingContext) =
+    if ctx.Footnotes.Count > 0 then
+        ctx.Writer.Write("<hr>" + ctx.Newline)
+        ctx.Writer.Write("<section>" + ctx.Newline)
+        ctx.Writer.Write("<ol>" + ctx.Newline)
+        
+        // Sort footnotes by their order in the document
+        let orderedFootnotes = 
+            ctx.Footnotes 
+            |> Seq.mapi (fun i kvp -> (i+1, kvp.Key, kvp.Value))
+            |> Seq.sortBy (fun (i,_,_) -> i)
+
+        for (i, id, (content, originalRef)) in orderedFootnotes do
+            ctx.Writer.Write(sprintf "<li id=\"fn%d\"><p>" i)
+            
+            // Output the footnote content
+            ctx.Writer.Write(content)
+            
+            // Add a back link to the reference
+            ctx.Writer.Write(sprintf " <a href=\"#fnref%d\">↩︎</a>" i)
+            
+            ctx.Writer.Write("</p>" + ctx.Newline)
+            ctx.Writer.Write("</li>" + ctx.Newline)
+        
+        ctx.Writer.Write("</ol>" + ctx.Newline)
+        ctx.Writer.Write("</section>" + ctx.Newline)
 
 let internal withInner ctx f =
     use sb = new StringWriter()
@@ -337,7 +383,8 @@ and internal formatParagraphs ctx paragraphs =
 /// a specified TextWriter. Parameters specify newline character
 /// and a dictionary with link keys defined in the document.
 let formatAsHtml writer generateAnchors wrap links newline paragraphs =
-    formatParagraphs
+    // Create context for HTML formatting
+    let formattingCtx = 
         { Writer = writer
           Links = links
           Newline = newline
@@ -346,5 +393,11 @@ let formatAsHtml writer generateAnchors wrap links newline paragraphs =
           GenerateHeaderAnchors = generateAnchors
           UniqueNameGenerator = new UniqueNameGenerator()
           ParagraphIndent = ignore
-          DefineSymbol = "HTML" }
-        paragraphs
+          DefineSymbol = "HTML"
+          Footnotes = new Dictionary<string, string * MarkdownSpans>() }
+    
+    // Format paragraphs
+    formatParagraphs formattingCtx paragraphs
+    
+    // Render footnotes at the end if any exist
+    renderFootnotes formattingCtx
