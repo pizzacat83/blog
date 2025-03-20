@@ -48,24 +48,21 @@ jobs:
       - name: Generate diff
         id: generate-diff
         run: |
-          diff_output=$(diff -r pr/_public main/_public || true)
-          # Escape special characters for GitHub Actions multiline strings
-          diff_output="${diff_output//'%'/'%25'}"
-          diff_output="${diff_output//$'\n'/'%0A'}"
-          diff_output="${diff_output//$'\r'/'%0D'}"
-          echo "diff=$diff_output" >> "$GITHUB_OUTPUT"
-          if [ -z "$diff_output" ]; then
+          {
+            echo 'diff<<EOFab7b817fb4182540ae557d44cba7f584'
+            diff -r pr/_public main/_public || true
+            echo EOFab7b817fb4182540ae557d44cba7f584
+          } >> "$GITHUB_OUTPUT"
+          {
+            echo 'changed_files<<EOFab7b817fb4182540ae557d44cba7f584'
+            diff -qr pr/_public main/_public || true
+            echo EOFab7b817fb4182540ae557d44cba7f584
+          } >> "$GITHUB_OUTPUT"
+
+            if diff -qr pr/_public main/_public > /dev/null; then
             echo "has_diff=false" >> "$GITHUB_OUTPUT"
-            echo "changed_files=" >> "$GITHUB_OUTPUT"
           else
             echo "has_diff=true" >> "$GITHUB_OUTPUT"
-            # Extract file names from diff output and format as a list
-            changed_files=$(diff -qr pr/_public main/_public)
-            # Escape for GitHub Actions output
-            changed_files="${changed_files//'%'/'%25'}"
-            changed_files="${changed_files//$'\n'/'%0A'}"
-            changed_files="${changed_files//$'\r'/'%0D'}"
-            echo "changed_files=$changed_files" >> "$GITHUB_OUTPUT"
           fi
 
   post-comment:

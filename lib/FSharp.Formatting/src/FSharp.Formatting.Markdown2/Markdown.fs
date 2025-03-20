@@ -19,7 +19,7 @@ type Markdown internal () =
 
         HtmlFormatting.formatAsHtml
             writer
-            false
+            true
             false
             doc.DefinedLinks
             newline

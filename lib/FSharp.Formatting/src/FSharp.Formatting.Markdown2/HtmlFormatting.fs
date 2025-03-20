@@ -225,13 +225,10 @@ let rec internal formatParagraph (ctx: FormattingContext) paragraph =
     | Heading(n, spans, _) ->
         ctx.Writer.Write("<h" + string<int> n + ">")
 
+        formatSpans ctx spans
         if ctx.GenerateHeaderAnchors then
             let anchorName = formatAnchor ctx spans
-            ctx.Writer.Write(sprintf """<a name="%s" class="anchor" href="#%s">""" anchorName anchorName)
-            formatSpans ctx spans
-            ctx.Writer.Write "</a>"
-        else
-            formatSpans ctx spans
+            ctx.Writer.Write(sprintf """<a name="%s" class="anchor" href="#%s">#</a>""" anchorName anchorName)
 
         ctx.Writer.Write("</h" + string<int> n + ">")
     | Paragraph(spans, _) ->

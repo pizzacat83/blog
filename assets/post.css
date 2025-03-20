@@ -4,6 +4,10 @@ article {
     margin: 0 auto;
     padding: 0 3rem;
 
+    .anchor {
+        margin-left: 0.4rem;
+    }
+
     p, ul, ol, pre {
         margin-bottom: 1em;
     }
