@@ -8,4 +8,5 @@ export PATH="$PATH:$HOME/.dotnet"
 dotnet --version
 dotnet tool restore
 dotnet paket restore
+dotnet build --configuration Release
 dotnet run --configuration Release --project fornax/src/Fornax build
