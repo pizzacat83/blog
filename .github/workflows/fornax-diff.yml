@@ -1,0 +1,83 @@
+name: Fornax Build Diff
+
+on:
+  pull_request:
+
+jobs:
+  build-and-diff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      diff: ${{ steps.generate-diff.outputs.diff }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build PR branch
+        working-directory: pr
+        run: |
+          dotnet tool restore
+          dotnet paket restore
+          dotnet run --configuration Release --project fornax/src/Fornax build
+
+      - name: Build main branch
+        working-directory: main
+        run: |
+          dotnet tool restore
+          dotnet paket restore
+          dotnet run --configuration Release --project fornax/src/Fornax build
+
+      - name: Generate diff
+        id: generate-diff
+        run: |
+          diff_output=$(diff -r pr/_public main/_public || true)
+          # Escape special characters for GitHub Actions multiline strings
+          diff_output="${diff_output//'%'/'%25'}"
+          diff_output="${diff_output//$'\n'/'%0A'}"
+          diff_output="${diff_output//$'\r'/'%0D'}"
+          echo "diff=$diff_output" >> "$GITHUB_OUTPUT"
+
+  post-comment:
+    needs: build-and-diff
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- fornax-build-diff -->'
+
+      - name: Update or create comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- fornax-build-diff -->
+            ## Fornax Build Diff
+            
+            The following differences were found between the PR and main branch builds:
+            
+            ```diff
+            ${{ needs.build-and-diff.outputs.diff }}
+            ```
+            
+            _Last updated: ${{ github.event.pull_request.head.sha }}_
+          edit-mode: replace
