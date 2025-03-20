@@ -12,6 +12,7 @@ jobs:
     outputs:
       diff: ${{ steps.generate-diff.outputs.diff }}
       has_diff: ${{ steps.generate-diff.outputs.has_diff }}
+      changed_files: ${{ steps.generate-diff.outputs.changed_files }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -55,8 +56,16 @@ jobs:
           echo "diff=$diff_output" >> "$GITHUB_OUTPUT"
           if [ -z "$diff_output" ]; then
             echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            echo "changed_files=" >> "$GITHUB_OUTPUT"
           else
             echo "has_diff=true" >> "$GITHUB_OUTPUT"
+            # Extract file names from diff output and format as a list
+            changed_files=$(diff -qr pr/_public main/_public)
+            # Escape for GitHub Actions output
+            changed_files="${changed_files//'%'/'%25'}"
+            changed_files="${changed_files//$'\n'/'%0A'}"
+            changed_files="${changed_files//$'\r'/'%0D'}"
+            echo "changed_files=$changed_files" >> "$GITHUB_OUTPUT"
           fi
 
   post-comment:
@@ -82,6 +91,9 @@ jobs:
           body: |
             <!-- build-diff -->
             ## Build Diff
+
+            Changed files:
+            ${{ needs.build-and-diff.outputs.changed_files }}
             
             <details>
               <summary>build diff</summary>
