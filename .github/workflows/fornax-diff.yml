@@ -60,7 +60,7 @@ jobs:
           else
             echo "has_diff=true" >> "$GITHUB_OUTPUT"
             # Extract file names from diff output and format as a list
-            changed_files=$(diff -qr pr/_public main/_public)
+            changed_files=$(diff -qr pr/_public main/_public || true)
             # Escape for GitHub Actions output
             changed_files="${changed_files//'%'/'%25'}"
             changed_files="${changed_files//$'\n'/'%0A'}"
