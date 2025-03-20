@@ -1,8 +1,12 @@
 article {
+    width: calc(100% - 6rem);
     max-width: 40rem; /* One line contains 80 characters, you know? */
-
     margin: 0 auto;
-    padding: 0 3rem;
+    @media (max-width: 600px) {
+        & {
+            width: calc(100% - 2rem);
+        }
+    }
 
     .anchor {
         margin-left: 0.4rem;
@@ -10,6 +14,12 @@ article {
 
     p, ul, ol, pre {
         margin-bottom: 1em;
+    }
+
+    @media (max-width: 600px) {
+        pre {
+            overflow-x: auto;
+        }
     }
 
     ul ul {
@@ -37,6 +47,14 @@ article {
 
             margin-top: 1rem;
             margin-bottom: 1.5rem;
+
+            @media (max-width: 600px) {
+                & {
+                    font-size: 2rem;
+                    margin-top: 0.5rem;
+                    margin-bottom: 1rem;
+                }
+            }
         }
     }
     
@@ -60,5 +78,11 @@ article {
 
     img {
         width: 100%;
+    }
+
+    @media (max-width: 600px) {
+        code {
+            word-wrap: break-word;
+        }
     }
 }

@@ -19,6 +19,12 @@ html {
     line-height: 1.6;
     font-size: 120%;
     color: var(--dark-gray);
+
+    @media (max-width: 600px) {
+        & {
+            font-size: 100%;
+        }
+    }
 }
 
 a {
@@ -44,6 +50,11 @@ ul, ol {
 
 body header nav {
     padding: 1rem 2rem;
+    @media (max-width: 600px) {
+        & {
+            padding: 1rem 1rem;
+        }
+    }
 
     display: flex;
     justify-content: space-between;

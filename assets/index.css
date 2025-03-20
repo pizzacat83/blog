@@ -1,7 +1,12 @@
 .index-main {
-    max-width: 40rem;
+    width: calc(100% - 6rem);
+    max-width: 40rem; /* One line contains 80 characters, you know? */
     margin: 0 auto;
-    padding: 0 3rem;
+    @media (max-width: 600px) {
+        & {
+            width: calc(100% - 2rem);
+        }
+    }
 
     .lang-filter {
         font-size: 0.75rem;
