@@ -64,7 +64,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Find existing comment
-        uses: peter-evans/find-comment@v3
+        uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
         id: find-comment
         with:
           issue-number: ${{ github.event.pull_request.number }}
@@ -72,7 +72,7 @@ jobs:
           body-includes: '<!-- build-diff -->'
 
       - name: Update or create comment
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
         if: ${{ needs.build-and-diff.outputs.has_diff == 'true' }}
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
@@ -94,7 +94,7 @@ jobs:
           edit-mode: replace
 
       - name: Update or create comment (no diff)
-        uses: peter-evans/create-or-update-comment@v3
+        uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
         if: ${{ needs.build-and-diff.outputs.has_diff == 'false' }}
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
