@@ -48,10 +48,9 @@ jobs:
       - name: Generate diff
         id: generate-diff
         run: |
-          diff_output=$(diff -r pr/_public main/_public || true)
           {
             echo 'diff<<EOFab7b817fb4182540ae557d44cba7f584'
-            echo $diff_output
+            diff -r pr/_public main/_public || true
             echo EOFab7b817fb4182540ae557d44cba7f584
           } >> "$GITHUB_OUTPUT"
           {
@@ -60,7 +59,7 @@ jobs:
             echo EOFab7b817fb4182540ae557d44cba7f584
           } >> "$GITHUB_OUTPUT"
 
-          if [ -z "$diff_output" ]; then
+            if diff -qr pr/_public main/_public > /dev/null; then
             echo "has_diff=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_diff=true" >> "$GITHUB_OUTPUT"
