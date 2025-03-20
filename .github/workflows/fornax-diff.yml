@@ -1,0 +1,123 @@
+name: Fornax Build Diff
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build-and-diff:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      diff: ${{ steps.generate-diff.outputs.diff }}
+      has_diff: ${{ steps.generate-diff.outputs.has_diff }}
+      changed_files: ${{ steps.generate-diff.outputs.changed_files }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          path: pr
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: main
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Build PR branch
+        working-directory: pr
+        run: |
+          dotnet tool restore
+          dotnet paket restore
+          dotnet build --configuration Release
+          dotnet run --configuration Release --project fornax/src/Fornax build
+
+      - name: Build main branch
+        working-directory: main
+        run: |
+          dotnet tool restore
+          dotnet paket restore
+          dotnet build --configuration Release
+          dotnet run --configuration Release --project fornax/src/Fornax build
+
+      - name: Generate diff
+        id: generate-diff
+        run: |
+          diff_output=$(diff -r pr/_public main/_public || true)
+          # Escape special characters for GitHub Actions multiline strings
+          diff_output="${diff_output//'%'/'%25'}"
+          diff_output="${diff_output//$'\n'/'%0A'}"
+          diff_output="${diff_output//$'\r'/'%0D'}"
+          echo "diff=$diff_output" >> "$GITHUB_OUTPUT"
+          if [ -z "$diff_output" ]; then
+            echo "has_diff=false" >> "$GITHUB_OUTPUT"
+            echo "changed_files=" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_diff=true" >> "$GITHUB_OUTPUT"
+            # Extract file names from diff output and format as a list
+            changed_files=$(diff -qr pr/_public main/_public)
+            # Escape for GitHub Actions output
+            changed_files="${changed_files//'%'/'%25'}"
+            changed_files="${changed_files//$'\n'/'%0A'}"
+            changed_files="${changed_files//$'\r'/'%0D'}"
+            echo "changed_files=$changed_files" >> "$GITHUB_OUTPUT"
+          fi
+
+  post-comment:
+    needs: build-and-diff
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Find existing comment
+        uses: peter-evans/find-comment@60c57613a233a2143853d3f68874167868b5d040
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: '<!-- build-diff -->'
+
+      - name: Update or create comment
+        uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
+        if: ${{ needs.build-and-diff.outputs.has_diff == 'true' }}
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- build-diff -->
+            ## Build Diff
+
+            Changed files:
+            ${{ needs.build-and-diff.outputs.changed_files }}
+            
+            <details>
+              <summary>build diff</summary>
+
+            ```diff
+            ${{ needs.build-and-diff.outputs.diff }}
+            ```
+
+            </details>
+            
+            _Last updated: ${{ github.event.pull_request.head.sha }}_
+          edit-mode: replace
+
+      - name: Update or create comment (no diff)
+        uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
+        if: ${{ needs.build-and-diff.outputs.has_diff == 'false' }}
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            <!-- build-diff -->
+            ## Build Diff
+            
+            No diff.
+            
+            _Last updated: ${{ github.event.pull_request.head.sha }}_
+          edit-mode: replace
