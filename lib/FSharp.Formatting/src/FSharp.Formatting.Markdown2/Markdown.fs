@@ -11,7 +11,7 @@ open System.IO
 
 /// Static class that provides methods for formatting
 /// and transforming Markdown documents.
-type Markdown2 internal () =
+type Markdown internal () =
     /// Transform the provided MarkdownDocument into HTML
     /// format and write the result to a given writer.
     static member WriteHtml(doc: FSharp.Formatting.Markdown.MarkdownDocument, writer, ?newline) =
@@ -35,7 +35,7 @@ type Markdown2 internal () =
         ) =
         let doc = FSharp.Formatting.Markdown.Markdown.Parse(markdownText, ?newline = newline)
 
-        Markdown2.WriteHtml(
+        Markdown.WriteHtml(
             doc,
             writer,
             ?newline = newline
@@ -47,7 +47,7 @@ type Markdown2 internal () =
         let sb = new System.Text.StringBuilder()
         use wr = new StringWriter(sb)
 
-        Markdown2.WriteHtml(
+        Markdown.WriteHtml(
             doc,
             wr,
             ?newline = newline
@@ -60,7 +60,7 @@ type Markdown2 internal () =
     static member ToHtml(markdownText: string, ?newline) =
         let doc = FSharp.Formatting.Markdown.Markdown.Parse(markdownText, ?newline = newline)
 
-        Markdown2.ToHtml(
+        Markdown.ToHtml(
             doc,
             ?newline = newline
         )
