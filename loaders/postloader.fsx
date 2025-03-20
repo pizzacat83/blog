@@ -1,6 +1,7 @@
 #r "../fornax/src/Fornax.Core/bin/Release/net8.0/Fornax.Core.dll"
 #r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Common.dll"
 #r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Markdown.dll"
+#r "../lib/FSharp.Formatting/src/FSharp.Formatting.Markdown2/bin/Release/net8.0/FSharp.Formatting.Markdown2.dll"
 #r "../packages/YamlDotNet/lib/netstandard2.0/YamlDotNet.dll"
 #r "../packages/FsToolkit.ErrorHandling/lib/netstandard2.0/FsToolkit.ErrorHandling.dll"
 
@@ -144,7 +145,7 @@ let parseSource (lang:  Language) (source: string): Result<ParsedSource, string>
             | Some(Literal(l, _)) -> Ok l
             | _ -> Error (sprintf "Unsupported title contents: %A" title)
     
-        let body = Markdown.ToHtml (MarkdownDocument(
+        let body = FSharp.Formatting.Markdown2.Markdown.ToHtml (MarkdownDocument(
             doc.Paragraphs
             |> List.filter (
                 function
