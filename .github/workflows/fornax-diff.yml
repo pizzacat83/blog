@@ -33,6 +33,7 @@ jobs:
         run: |
           dotnet tool restore
           dotnet paket restore
+          dotnet build --configuration Release
           dotnet run --configuration Release --project fornax/src/Fornax build
 
       - name: Build main branch
@@ -40,6 +41,7 @@ jobs:
         run: |
           dotnet tool restore
           dotnet paket restore
+          dotnet build --configuration Release
           dotnet run --configuration Release --project fornax/src/Fornax build
 
       - name: Generate diff
