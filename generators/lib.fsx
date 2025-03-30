@@ -14,6 +14,182 @@ let is_watch =
     false
 #endif
 
+module Html =
+    type Tag = Tag of string with
+        override this.ToString() =
+            let (Tag value) = this
+            value
+
+    let tag (s: string) = Tag (s.ToLower())
+
+    type Attribute = string * string
+
+    type
+        Node =
+        | Element of Element
+        | Text of string
+        | DangerouslyInsertRawHtml of string
+    and
+        Element = {
+            tag: Tag
+            attributes: Attribute list
+            children: Node list
+        }
+
+    type Document = Document of Node
+
+    let shouldEscapeContent (tag: Tag) =
+        match tag with
+        | Tag ("style" | "script" | "xmp" | "iframe" | "noembed" | "noframes" | "plaintext") -> true
+        | _ -> false
+
+    // https://spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
+    let rec serialize (parent: Element option) (node: Node): string = 
+        match node with
+        | Element e ->
+            let tag = e.tag.ToString()
+            let attrs =
+                e.attributes
+                |> List.map (fun (name, value) ->
+                    $" {name}=\"{value |> WebUtility.HtmlEncode}\"")
+                |> String.concat ""
+            let children =
+                e.children
+                |> List.map (serialize (Option.Some e))
+                |> String.concat ""
+            $"<{tag}{attrs}>{children}</{tag}>"
+        | Text text ->
+            match parent with
+            | Some element when shouldEscapeContent element.tag ->
+                text
+            | _ ->
+                WebUtility.HtmlEncode text
+        | DangerouslyInsertRawHtml html -> html
+        
+
+    let serializeDocument (doc: Document): string =
+        let (Document child) = doc
+        $"<!DOCTYPE html>{serialize None child}"
+
+    let a (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "a"
+            attributes = attributes
+            children = children
+        }
+    
+    let div (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "div"
+            attributes = attributes
+            children = children
+        }
+    let h1 (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "h1"
+            attributes = attributes
+            children = children
+        }
+    let h2 (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "h2"
+            attributes = attributes
+            children = children
+        }
+
+    let h3 (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "h3"
+            attributes = attributes
+            children = children
+        }
+
+    let span (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "span"
+            attributes = attributes
+            children = children
+        }
+    
+    let p (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "p"
+            attributes = attributes
+            children = children
+        }
+
+    let html (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "html"
+            attributes = attributes
+            children = children
+        }
+    
+    let head (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "head"
+            attributes = attributes
+            children = children
+        }
+
+    let body (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "body"
+            attributes = attributes
+            children = children
+        }
+
+    let meta (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "meta"
+            attributes = attributes
+            children = children
+        }
+
+    let title (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "title"
+            attributes = attributes
+            children = children
+        }
+
+    let link (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "link"
+            attributes = attributes
+            children = children
+        }
+
+    let nav (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "nav"
+            attributes = attributes
+            children = children
+        }
+
+    let header (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "header"
+            attributes = attributes
+            children = children
+        }
+
+    let main (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "main"
+            attributes = attributes
+            children = children
+        }
+
+    let footer (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag "footer"
+            attributes = attributes
+            children = children
+        }
+
+    let (!!) (text: string) = Text text
+
 
 let websocketScript =
     RawHtml """
@@ -39,8 +215,10 @@ let topPath (language: Postloader.Language) =
     | Postloader.English -> "en"
     | Postloader.Japanese -> "ja"
 
+open Html
 
-let layout (language: Postloader.Language option) (title: string) (description: string option) (children: string) (stylesheets: string list) (head: string) (head_prefix: string) =
+let layout (language: Postloader.Language option) (title_text: string) (description: string option) (children: Node list) (stylesheets: string list) (head_contents: Node list) (head_prefix: string) =
+
     let logoHref =
         match language with
         | Some lang -> $"/{topPath lang}"
@@ -48,54 +226,54 @@ let layout (language: Postloader.Language option) (title: string) (description: 
     
     let meta_description =
         description
-        |> Option.map (fun d -> $"""<meta name="description" content="{d |> WebUtility.HtmlEncode}">""")
-        |> Option.defaultValue ""
+        |> Option.map (fun d ->
+            meta [
+                "name", "description"
+                "content", d
+            ] [])
+        |> Option.toList
 
-    $"""
-<!DOCTYPE html>
-<html lang="en">
-<head prefix="{head_prefix}">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title}</title>
-{meta_description}
-{head}
-
-<link rel="stylesheet" href="/assets/style.css">
-{
-    stylesheets
-    |> List.map (fun s -> sprintf "<link rel=\"stylesheet\" href=\"%s\">" s)
-    |> String.concat "\n"
-}
-<link rel="alternate" type="application/rss+xml" title="posts" href="/rss.xml">
-
-{if is_watch then websocketScript |> (fun (RawHtml x) -> x) else ""}
-</head>
-<body>
-
-<header>
-<nav>
-    <div class="blog-title">
-        <a href="{logoHref}">pizzacat83's blog</a>
-    </div>
-    <div>
-        <a href="https://pizzacat83.com">About</a>
-    </div>
-</nav>
-</header>
-<main>
-
-{children}
-
-</main>
-
-<footer>
-   <p>© 2025 pizzacat83 • <a href="/rss.xml">Feed</a></p>
-</footer>
-
-</body>
-</html>
-    """
+    Document(
+        html ["lang", "en"] [
+            head ["prefix", head_prefix] (
+                [
+                    meta ["charset", "UTF-8"] []
+                    meta ["name", "viewport"; "content", "width=device-width, initial-scale=1.0"] []
+                    title [] [!! title_text]
+                ]
+                @ meta_description
+                @ head_contents
+                @ [
+                    link ["rel", "stylesheet"; "href", "/assets/style.css"] []
+                ]
+                @ (stylesheets |> List.map (fun s ->
+                    link ["rel", "stylesheet"; "href", s] []))
+                @ [
+                    link ["rel", "alternate"; "type", "application/rss+xml"; "title", "posts"; "href", "/rss.xml"] []
+                ]
+                @ if is_watch then [DangerouslyInsertRawHtml (let (RawHtml x) = websocketScript in x)] else []
+            )
+            body [] [
+                header [] [
+                    nav [] [
+                        div ["class", "blog-title"] [
+                            a ["href", logoHref] [!! "pizzacat83's blog"]
+                        ]
+                        div [] [
+                            a ["href", "https://pizzacat83.com"] [!! "About"]
+                        ]
+                    ]
+                ]
+                main [] children
+                footer [] [
+                    p [] [
+                        !! "© 2025 pizzacat83 • "
+                        a ["href", "/rss.xml"] [!! "Feed"]
+                    ]
+                ]
+            ]
+        ]
+    ) |> serializeDocument
 
 type LocalizedPost = {
     key: Postloader.PostKey
