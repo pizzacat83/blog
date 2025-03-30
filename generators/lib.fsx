@@ -71,123 +71,31 @@ module Html =
         let (Document child) = doc
         $"<!DOCTYPE html>{serialize None child}"
 
-    let a (attributes: Attribute list) (children: Node list) =
+    let element (tagName: string) (attributes: Attribute list) (children: Node list) =
         Element {
-            tag = tag "a"
+            tag = tag tagName
             attributes = attributes
             children = children
         }
+
+    let a = element "a"
+    let div = element "div"
+    let h1 = element "h1"
+    let h2 = element "h2"
+    let h3 = element "h3"
+    let span = element "span"
+    let p = element "p"
+    let html = element "html"
+    let head = element "head"
+    let body = element "body"
+    let meta = element "meta"
+    let title = element "title"
+    let link = element "link"
+    let nav = element "nav"
+    let header = element "header"
+    let main = element "main"
+    let footer = element "footer"
     
-    let div (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "div"
-            attributes = attributes
-            children = children
-        }
-    let h1 (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "h1"
-            attributes = attributes
-            children = children
-        }
-    let h2 (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "h2"
-            attributes = attributes
-            children = children
-        }
-
-    let h3 (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "h3"
-            attributes = attributes
-            children = children
-        }
-
-    let span (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "span"
-            attributes = attributes
-            children = children
-        }
-    
-    let p (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "p"
-            attributes = attributes
-            children = children
-        }
-
-    let html (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "html"
-            attributes = attributes
-            children = children
-        }
-    
-    let head (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "head"
-            attributes = attributes
-            children = children
-        }
-
-    let body (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "body"
-            attributes = attributes
-            children = children
-        }
-
-    let meta (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "meta"
-            attributes = attributes
-            children = children
-        }
-
-    let title (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "title"
-            attributes = attributes
-            children = children
-        }
-
-    let link (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "link"
-            attributes = attributes
-            children = children
-        }
-
-    let nav (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "nav"
-            attributes = attributes
-            children = children
-        }
-
-    let header (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "header"
-            attributes = attributes
-            children = children
-        }
-
-    let main (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "main"
-            attributes = attributes
-            children = children
-        }
-
-    let footer (attributes: Attribute list) (children: Node list) =
-        Element {
-            tag = tag "footer"
-            attributes = attributes
-            children = children
-        }
-
     let (!!) (text: string) = Text text
 
 
