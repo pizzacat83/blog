@@ -95,14 +95,14 @@ module Html =
     let header = element "header"
     let main = element "main"
     let footer = element "footer"
+    let script = element "script"
     
     let (!!) (text: string) = Text text
 
+open Html
 
-let websocketScript =
-    RawHtml """
-    <script type="text/javascript">
-        var wsUri = "ws://localhost:8080/websocket";
+let websocketScript = script [] [!!"""
+    var wsUri = "ws://localhost:8080/websocket";
     function init()
     {
     websocket = new WebSocket(wsUri);
@@ -115,15 +115,13 @@ let websocketScript =
     document.location.reload();
     }
     window.addEventListener("load", init, false);
-    </script>
-    """
+    """]
 
 let topPath (language: Postloader.Language) = 
     match language with
     | Postloader.English -> "en"
     | Postloader.Japanese -> "ja"
 
-open Html
 
 let layout (language: Postloader.Language option) (title_text: string) (description: string option) (children: Node list) (stylesheets: string list) (head_contents: Node list) (head_prefix: string) =
 
@@ -159,7 +157,7 @@ let layout (language: Postloader.Language option) (title_text: string) (descript
                 @ [
                     link ["rel", "alternate"; "type", "application/rss+xml"; "title", "posts"; "href", "/rss.xml"] []
                 ]
-                @ if is_watch then [DangerouslyInsertRawHtml (let (RawHtml x) = websocketScript in x)] else []
+                @ if is_watch then [websocketScript] else []
             )
             body [] [
                 header [] [
