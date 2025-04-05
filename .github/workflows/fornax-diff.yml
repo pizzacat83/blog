@@ -57,16 +57,16 @@ jobs:
         run: |
           {
             echo 'diff<<EOFab7b817fb4182540ae557d44cba7f584'
-            diff -r pr/_public main/_public || true
+            diff -r main/_public pr/_public || true
             echo EOFab7b817fb4182540ae557d44cba7f584
           } >> "$GITHUB_OUTPUT"
           {
             echo 'changed_files<<EOFab7b817fb4182540ae557d44cba7f584'
-            diff -qr pr/_public main/_public || true
+            diff -qr main/_public pr/_public || true
             echo EOFab7b817fb4182540ae557d44cba7f584
           } >> "$GITHUB_OUTPUT"
 
-            if diff -qr pr/_public main/_public > /dev/null; then
+            if diff -qr main/_public pr/_public > /dev/null; then
             echo "has_diff=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_diff=true" >> "$GITHUB_OUTPUT"
