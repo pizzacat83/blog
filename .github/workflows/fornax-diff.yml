@@ -45,6 +45,12 @@ jobs:
           dotnet build --configuration Release
           dotnet run --configuration Release --project fornax/src/Fornax build
 
+      - name: Format HTML files
+        run: |
+          npm install -g prettier
+          npx prettier --write "pr/_public/**/*.html"
+          npx prettier --write "main/_public/**/*.html"
+
       - name: Generate diff
         id: generate-diff
         run: |
