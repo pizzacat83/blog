@@ -47,10 +47,9 @@ jobs:
 
       - name: Format HTML files
         run: |
-            sudo apt-get update
-            sudo apt-get install -y tidy
-            tidy -modify -quiet -indent --wrap 0 pr/_public/**/*.html || true
-            tidy -modify -quiet -indent --wrap 0 main/_public/**/*.html || true
+          npm install -g prettier
+          npx prettier --write "pr/_public/**/*.html"
+          npx prettier --write "main/_public/**/*.html"
 
       - name: Generate diff
         id: generate-diff
