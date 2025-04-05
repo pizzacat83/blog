@@ -1,6 +1,7 @@
 #if !FORNAX
 #load "../loaders/postloader.fsx"
 #endif
+#r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Markdown.dll"
 
 open System.Net
 
@@ -105,6 +106,7 @@ type LocalizedPost = {
     title: string
     summary: string
     body: string
+    headings: FSharp.Formatting.Markdown2.HtmlFormatting.RenderedHeadingInfo list
 
     assets: Postloader.Asset list
 
@@ -125,6 +127,7 @@ let getLocalizedPosts (ctx: SiteContents) (language: Postloader.Language): Local
                 title = content.title
                 summary = content.summary
                 body = content.body
+                headings = content.headings
 
                 assets = content.assets
 
@@ -151,6 +154,7 @@ let getPrimaryLocalizedPosts (ctx: SiteContents): LocalizedPost seq =
             title = content.title
             summary = content.summary
             body = content.body
+            headings = content.headings
 
             assets = content.assets
 
