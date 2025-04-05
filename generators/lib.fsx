@@ -124,7 +124,14 @@ let topPath (language: Postloader.Language) =
 
 
 let layout (language: Postloader.Language option) (title_text: string) (description: string option) (children: Node list) (stylesheets: string list) (head_contents: Node list) (head_prefix: string) =
-
+    let htmlLanguage =
+        match language with
+        | Some lang ->
+            match lang with
+            | Postloader.Language.English -> "en"
+            | Postloader.Language.Japanese -> "ja"
+        | None -> "en"
+    
     let logoHref =
         match language with
         | Some lang -> $"/{topPath lang}"
@@ -140,7 +147,7 @@ let layout (language: Postloader.Language option) (title_text: string) (descript
         |> Option.toList
 
     Document(
-        html ["lang", "en"] [
+        html ["lang", htmlLanguage] [
             head ["prefix", head_prefix] (
                 [
                     meta ["charset", "UTF-8"] []
