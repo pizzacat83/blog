@@ -104,6 +104,9 @@ module Html =
     let main = element "main"
     let footer = element "footer"
     let script = element "script"
+    let ul = element "ul"
+    let ol = element "ol"
+    let li = element "li"
     
     let (!!) (text: string) = Text text
 
