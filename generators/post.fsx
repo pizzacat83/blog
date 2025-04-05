@@ -41,20 +41,19 @@ let buildTocTree (headings: RenderedHeadingInfo list) : TocItem list =
         // constructs ToC subtrees by consuming headings of the same or lower level.
         // Returns the list of ToC subtrees and the remaining headings (that starts with a higher level).
         let rec consumeSections (headings: RenderedHeadingInfo list) (level: int): TocItem list * RenderedHeadingInfo list =
-            let rec processHeadings (acc: TocItem list) (remaining: RenderedHeadingInfo list): TocItem list * RenderedHeadingInfo list =
-                match remaining with
-                | [] -> List.rev acc, []
-                | h :: rest when h.level = level ->
-                    let children, nextRemaining = consumeSections rest (level + 1)
-                    let item = { heading = h; children = children }
-                    processHeadings (item :: acc) nextRemaining
-                | h :: _ when h.level < level ->
-                    // We have reached a higher level heading, so we stop consuming.
-                    List.rev acc, remaining
-                | h :: _ ->
-                    failwithf "Unexpected heading level %d (%s), where current level = %d" h.level h.html level
+            match headings with
+            | [] -> [], []
+            | h :: remaining when h.level = level ->
+                let children, remaining2 = consumeSections remaining (level + 1)
+                let item = { heading = h; children = children }
+                let followingItems, remaining3 = consumeSections remaining2 level
+                item :: followingItems, remaining3
+            | h :: _ when h.level < level ->
+                // We have reached a higher level heading, so we stop consuming.
+                [], headings
+            | h :: _ ->
+                failwithf "Unexpected heading level %d (%s), where current level = %d" h.level h.html level
             
-            processHeadings [] headings
         
         let result, remaining = consumeSections headings minLevel
         
