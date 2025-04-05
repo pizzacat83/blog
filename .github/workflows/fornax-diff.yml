@@ -48,8 +48,8 @@ jobs:
       - name: Format HTML files
         run: |
           npm install -g prettier
-          npx prettier --write "pr/_public/**/*.html"
-          npx prettier --write "main/_public/**/*.html"
+          npx prettier --print-width 99999 --write "pr/_public/**/*.html"
+          npx prettier --print-width 99999 --write "main/_public/**/*.html"
 
       - name: Generate diff
         id: generate-diff
