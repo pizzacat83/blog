@@ -42,8 +42,12 @@ module Html =
         match tag with
         | Tag ("style" | "script" | "xmp" | "iframe" | "noembed" | "noframes" | "plaintext") -> true
         | _ -> false
+    
+    let isVoidElement = function
+        | Tag ("area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" | "link" | "meta" | "source" | "track" | "wbr" | "basefont" | "bgsound" | "frame" | "keygen" | "param") -> true
+        | _ -> false
 
-    // https://spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
+    // https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
     let rec serialize (parent: Element option) (node: Node): string = 
         match node with
         | Element e ->
@@ -53,11 +57,14 @@ module Html =
                 |> List.map (fun (name, value) ->
                     $" {name}=\"{value |> WebUtility.HtmlEncode}\"")
                 |> String.concat ""
-            let children =
-                e.children
-                |> List.map (serialize (Option.Some e))
-                |> String.concat ""
-            $"<{tag}{attrs}>{children}</{tag}>"
+            if isVoidElement e.tag then
+                $"<{tag}{attrs}>"
+            else
+                let children =
+                    e.children
+                    |> List.map (serialize (Option.Some e))
+                    |> String.concat ""
+                $"<{tag}{attrs}>{children}</{tag}>"
         | Text text ->
             match parent with
             | Some element when shouldEscapeContent element.tag ->
