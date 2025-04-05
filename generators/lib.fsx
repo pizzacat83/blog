@@ -14,11 +14,102 @@ let is_watch =
     false
 #endif
 
+module Html =
+    type Tag = Tag of string with
+        override this.ToString() =
+            let (Tag value) = this
+            value
 
-let websocketScript =
-    RawHtml """
-    <script type="text/javascript">
-        var wsUri = "ws://localhost:8080/websocket";
+    let tag (s: string) = Tag (s.ToLower())
+
+    type Attribute = string * string
+
+    type
+        Node =
+        | Element of Element
+        | Text of string
+        | DangerouslyInsertRawHtml of string
+    and
+        Element = {
+            tag: Tag
+            attributes: Attribute list
+            children: Node list
+        }
+
+    type Document = Document of Node
+
+    let shouldEscapeContent (tag: Tag) =
+        match tag with
+        | Tag ("style" | "script" | "xmp" | "iframe" | "noembed" | "noframes" | "plaintext") -> true
+        | _ -> false
+    
+    let isVoidElement = function
+        | Tag ("area" | "base" | "br" | "col" | "embed" | "hr" | "img" | "input" | "link" | "meta" | "source" | "track" | "wbr" | "basefont" | "bgsound" | "frame" | "keygen" | "param") -> true
+        | _ -> false
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#serialising-html-fragments
+    let rec serialize (parent: Element option) (node: Node): string = 
+        match node with
+        | Element e ->
+            let tag = e.tag.ToString()
+            let attrs =
+                e.attributes
+                |> List.map (fun (name, value) ->
+                    $" {name}=\"{value |> WebUtility.HtmlEncode}\"")
+                |> String.concat ""
+            if isVoidElement e.tag then
+                $"<{tag}{attrs}>"
+            else
+                let children =
+                    e.children
+                    |> List.map (serialize (Option.Some e))
+                    |> String.concat ""
+                $"<{tag}{attrs}>{children}</{tag}>"
+        | Text text ->
+            match parent with
+            | Some element when shouldEscapeContent element.tag ->
+                text
+            | _ ->
+                WebUtility.HtmlEncode text
+        | DangerouslyInsertRawHtml html -> html
+        
+
+    let serializeDocument (doc: Document): string =
+        let (Document child) = doc
+        $"<!DOCTYPE html>{serialize None child}"
+
+    let element (tagName: string) (attributes: Attribute list) (children: Node list) =
+        Element {
+            tag = tag tagName
+            attributes = attributes
+            children = children
+        }
+
+    let a = element "a"
+    let div = element "div"
+    let h1 = element "h1"
+    let h2 = element "h2"
+    let h3 = element "h3"
+    let span = element "span"
+    let p = element "p"
+    let html = element "html"
+    let head = element "head"
+    let body = element "body"
+    let meta = element "meta"
+    let title = element "title"
+    let link = element "link"
+    let nav = element "nav"
+    let header = element "header"
+    let main = element "main"
+    let footer = element "footer"
+    let script = element "script"
+    
+    let (!!) (text: string) = Text text
+
+open Html
+
+let websocketScript = script [] [!!"""
+    var wsUri = "ws://localhost:8080/websocket";
     function init()
     {
     websocket = new WebSocket(wsUri);
@@ -31,8 +122,7 @@ let websocketScript =
     document.location.reload();
     }
     window.addEventListener("load", init, false);
-    </script>
-    """
+    """]
 
 let topPath (language: Postloader.Language) = 
     match language with
@@ -40,7 +130,15 @@ let topPath (language: Postloader.Language) =
     | Postloader.Japanese -> "ja"
 
 
-let layout (language: Postloader.Language option) (title: string) (description: string option) (children: string) (stylesheets: string list) (head: string) (head_prefix: string) =
+let layout (language: Postloader.Language option) (title_text: string) (description: string option) (children: Node list) (stylesheets: string list) (head_contents: Node list) (head_prefix: string) =
+    let htmlLanguage =
+        match language with
+        | Some lang ->
+            match lang with
+            | Postloader.Language.English -> "en"
+            | Postloader.Language.Japanese -> "ja"
+        | None -> "en"
+    
     let logoHref =
         match language with
         | Some lang -> $"/{topPath lang}"
@@ -48,54 +146,54 @@ let layout (language: Postloader.Language option) (title: string) (description: 
     
     let meta_description =
         description
-        |> Option.map (fun d -> $"""<meta name="description" content="{d |> WebUtility.HtmlEncode}">""")
-        |> Option.defaultValue ""
+        |> Option.map (fun d ->
+            meta [
+                "name", "description"
+                "content", d
+            ] [])
+        |> Option.toList
 
-    $"""
-<!DOCTYPE html>
-<html lang="en">
-<head prefix="{head_prefix}">
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{title}</title>
-{meta_description}
-{head}
-
-<link rel="stylesheet" href="/assets/style.css">
-{
-    stylesheets
-    |> List.map (fun s -> sprintf "<link rel=\"stylesheet\" href=\"%s\">" s)
-    |> String.concat "\n"
-}
-<link rel="alternate" type="application/rss+xml" title="posts" href="/rss.xml">
-
-{if is_watch then websocketScript |> (fun (RawHtml x) -> x) else ""}
-</head>
-<body>
-
-<header>
-<nav>
-    <div class="blog-title">
-        <a href="{logoHref}">pizzacat83's blog</a>
-    </div>
-    <div>
-        <a href="https://pizzacat83.com">About</a>
-    </div>
-</nav>
-</header>
-<main>
-
-{children}
-
-</main>
-
-<footer>
-   <p>© 2025 pizzacat83 • <a href="/rss.xml">Feed</a></p>
-</footer>
-
-</body>
-</html>
-    """
+    Document(
+        html ["lang", htmlLanguage] [
+            head ["prefix", head_prefix] (
+                [
+                    meta ["charset", "UTF-8"] []
+                    meta ["name", "viewport"; "content", "width=device-width, initial-scale=1.0"] []
+                    title [] [!! title_text]
+                ]
+                @ meta_description
+                @ head_contents
+                @ [
+                    link ["rel", "stylesheet"; "href", "/assets/style.css"] []
+                ]
+                @ (stylesheets |> List.map (fun s ->
+                    link ["rel", "stylesheet"; "href", s] []))
+                @ [
+                    link ["rel", "alternate"; "type", "application/rss+xml"; "title", "posts"; "href", "/rss.xml"] []
+                ]
+                @ if is_watch then [websocketScript] else []
+            )
+            body [] [
+                header [] [
+                    nav [] [
+                        div ["class", "blog-title"] [
+                            a ["href", logoHref] [!! "pizzacat83's blog"]
+                        ]
+                        div [] [
+                            a ["href", "https://pizzacat83.com"] [!! "About"]
+                        ]
+                    ]
+                ]
+                main [] children
+                footer [] [
+                    p [] [
+                        !! "© 2025 pizzacat83 • "
+                        a ["href", "/rss.xml"] [!! "Feed"]
+                    ]
+                ]
+            ]
+        ]
+    ) |> serializeDocument
 
 type LocalizedPost = {
     key: Postloader.PostKey

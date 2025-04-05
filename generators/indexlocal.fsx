@@ -38,7 +38,7 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
         )
         |> String.concat " / "
 
-    Lib.layout (Some language) "pizzacat83's blog" None $"""
+    Lib.layout (Some language) "pizzacat83's blog" None [Lib.Html.DangerouslyInsertRawHtml $"""
 <div class="index-main">
     <div class="lang-filter">
         <a href="/">All languages</a> / {languageFilter}
@@ -54,14 +54,14 @@ let generate' (ctx : SiteContents) (projectRoot: string) (language: Postloader.L
     </div>
 
 </div>
-    """ ["/assets/index.css"] $"""
+    """] ["/assets/index.css"] [Lib.Html.DangerouslyInsertRawHtml $"""
 <meta property="og:title" content="pizzacat83's blog" />
 <meta property="og:site_name" content="pizzacat83's blog" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="{url}" />
 
 <link rel="canonical" href="{url}">
-    """ "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
+    """] "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
 
 let generate (ctx : SiteContents) (projectRoot: string) (page: string): list<string * string> =
     Postloader.languages
