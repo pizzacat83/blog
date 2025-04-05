@@ -5,6 +5,7 @@
 open Lib
 open System.Net
 open FSharp.Formatting.Markdown2.HtmlFormatting
+open Html
 
 let websocketScript =
     RawHtml """
@@ -62,17 +63,17 @@ let buildTocTree (headings: RenderedHeadingInfo list) : TocItem list =
         result
 
 // Convert ToC tree to HTML elements
-let rec tocItemToHtml (item: TocItem) : Html.Node =
-    Html.li [] (
-        [Html.a ["href", "#" + item.heading.anchor] [Html.DangerouslyInsertRawHtml item.heading.html]]
+let rec tocItemToHtml (item: TocItem) : Node =
+    li [] (
+        [a ["href", "#" + item.heading.anchor] [DangerouslyInsertRawHtml item.heading.html]]
          @ if not (List.isEmpty item.children) then
-            [Html.ul [] (item.children |> List.map tocItemToHtml)]
+            [ul [] (item.children |> List.map tocItemToHtml)]
           else
             []
     )
 
-let tocToHtml (toc: TocItem list) : Html.Node =
-    Html.ul ["class", "toc"] (toc |> List.map tocItemToHtml)
+let tocToHtml (toc: TocItem list) : Node =
+    ul ["class", "toc"] (toc |> List.map tocItemToHtml)
 
 let layout (post: Lib.LocalizedPost) =
     let published = post.published.ToString("yyyy-MM-dd")
@@ -82,15 +83,15 @@ let layout (post: Lib.LocalizedPost) =
     let tocTree = buildTocTree post.headings
     let tocHtml = 
         if List.isEmpty tocTree then
-            Html.Text ""
+            Text ""
         else
-            Html.div ["class", "toc-container"] [
-                Html.h2 [] [Html.Text "Table of Contents"]
-                Html.nav [] [tocToHtml tocTree]
+            div ["class", "toc-container"] [
+                h2 [] [Text "Table of Contents"]
+                nav [] [tocToHtml tocTree]
             ]
     
     Lib.layout (Some post.language) post.title (Some post.summary)([
-        Html.DangerouslyInsertRawHtml $"""
+        DangerouslyInsertRawHtml $"""
 <div class="content-wrapper">
     <article>   
         <header>
@@ -99,14 +100,14 @@ let layout (post: Lib.LocalizedPost) =
         <h1>
             {post.title}
         </h1>
-        {Html.serialize None tocHtml}
+        {serialize None tocHtml}
         </header>
         <div class="post-body">
             {post.body}
         </div>
     </article>
     <aside class="sidebar">
-        {Html.serialize None tocHtml}
+        {serialize None tocHtml}
     </aside>
 </div>
 
@@ -115,7 +116,7 @@ let layout (post: Lib.LocalizedPost) =
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/fsharp.min.js" integrity="sha512-S3tgSOL0xKKsqOdbPP7AZKtb/L0bXVG/PW7RNRVXOqCWEiBRzIq9oTIinLoY11MB58l1/f++IHM+mp1Nfk2ETA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>hljs.configure({{languages:[]}});hljs.highlightAll();</script>
         """
-    ]) ["/assets/post.css"] [Html.DangerouslyInsertRawHtml $"""
+    ]) ["/assets/post.css"] [DangerouslyInsertRawHtml $"""
 <meta property="og:title" content="{post.title |> WebUtility.HtmlEncode}" />
 <meta property="og:description" content="{post.summary |> WebUtility.HtmlEncode}" />
 <meta property="og:site_name" content="pizzacat83's blog" />
