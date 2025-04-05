@@ -13,6 +13,13 @@ open System.Text.RegularExpressions
 open FSharp.Collections
 open FSharp.Formatting.Markdown
 
+/// Information about a rendered heading
+type RenderedHeadingInfo = {
+    level: int
+    html: string
+    anchor: string
+}
+
 // --------------------------------------------------------------------------------------
 // Formats Markdown documents as an HTML file
 // --------------------------------------------------------------------------------------
@@ -398,3 +405,39 @@ let formatAsHtml writer generateAnchors wrap links newline paragraphs =
     
     // Render footnotes at the end if any exist
     renderFootnotes formattingCtx
+
+/// Write a MarkdownParagraph value to a TextWriter as HTML
+let rec internal headingOfParagraph ctx (paragraph: MarkdownParagraph): RenderedHeadingInfo option =
+
+    match paragraph with
+    | Heading(n, spans, _) ->
+        // capture the rendered content
+        let ctx = { ctx with Writer = new StringWriter() }
+        formatSpans ctx spans
+        let anchorName = formatAnchor ctx spans
+        
+        Some {
+            level = n
+            html = ctx.Writer.ToString()
+            anchor = anchorName }
+    | _ -> None
+
+let internal collectHeadingsFromParagraphs ctx paragraphs =
+    paragraphs
+    |> Seq.map (headingOfParagraph ctx)
+    |> Seq.choose id
+
+let collectHeadings  wrap links newline paragraphs =
+    let ctx = 
+        { Writer = new StringWriter()
+          Links = links
+          Newline = newline
+          LineBreak = ignore
+          WrapCodeSnippets = wrap
+          GenerateHeaderAnchors = true
+          UniqueNameGenerator = new UniqueNameGenerator()
+          ParagraphIndent = ignore
+          DefineSymbol = "HTML"
+          Footnotes = new Dictionary<string, string * MarkdownSpans>() }
+
+    collectHeadingsFromParagraphs ctx paragraphs

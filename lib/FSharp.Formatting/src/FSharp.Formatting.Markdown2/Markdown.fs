@@ -64,3 +64,12 @@ type Markdown internal () =
             doc,
             ?newline = newline
         )
+
+    /// Transform the provided MarkdownDocument into HTML
+    /// format and return the result as a string.
+    static member Headings(doc: FSharp.Formatting.Markdown.MarkdownDocument, ?newline): HtmlFormatting.RenderedHeadingInfo seq =
+        HtmlFormatting.collectHeadings
+            false
+            doc.DefinedLinks
+            (defaultArg newline Environment.NewLine)
+            doc.Paragraphs

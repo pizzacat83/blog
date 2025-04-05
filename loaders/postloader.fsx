@@ -8,6 +8,7 @@
 open System.IO
 open FsToolkit.ErrorHandling
 open FSharp.Formatting.Markdown
+open FSharp.Formatting.Markdown2.HtmlFormatting
 
 // TODO: fornax should provide this value as arguments, not directives
 let isWatch =
@@ -33,6 +34,8 @@ type Content = {
     title: string
     summary: string
     body: string
+    bodyDoc: MarkdownDocument
+    headings: RenderedHeadingInfo list
 
     assets: Asset list
 
@@ -117,6 +120,8 @@ type ParsedSource = {
     frontmatter: FrontMatter
     title: string
     body: string
+    bodyDoc: MarkdownDocument
+    headings: RenderedHeadingInfo list
 }
 
 let readFile (path: string): string option =
@@ -145,7 +150,7 @@ let parseSource (lang:  Language) (source: string): Result<ParsedSource, string>
             | Some(Literal(l, _)) -> Ok l
             | _ -> Error (sprintf "Unsupported title contents: %A" title)
     
-        let body = FSharp.Formatting.Markdown2.Markdown.ToHtml (MarkdownDocument(
+        let bodyDoc = MarkdownDocument(
             doc.Paragraphs
             |> List.filter (
                 function
@@ -154,14 +159,20 @@ let parseSource (lang:  Language) (source: string): Result<ParsedSource, string>
                 | _ -> true
             ),
             doc.DefinedLinks
-        ))
+        )
 
-        return! Ok {
+        let body = FSharp.Formatting.Markdown2.Markdown.ToHtml bodyDoc
+        let headings = FSharp.Formatting.Markdown2.Markdown.Headings bodyDoc |> Seq.toList
+
+        let parsed =  {
             language = lang
             frontmatter = frontmatter
             title = title
             body = body
+            bodyDoc = bodyDoc
+            headings = headings
         }
+        return! Ok parsed
     }
 
 let loadAssets (dirpath: string): Asset list =
@@ -219,6 +230,8 @@ let loadPost (dirpath: string): Result<Post option, string> =
                         title = source.title
                         summary = source.frontmatter.summary
                         body = source.body
+                        bodyDoc = source.bodyDoc
+                        headings = source.headings
 
                         assets = assets
 
