@@ -33,25 +33,34 @@ type TocItem = {
 
 // Convert flat heading list to hierarchical ToC tree
 let buildTocTree (headings: RenderedHeadingInfo list) : TocItem list =
-    let rec processLevel (currentLevel: int) (items: RenderedHeadingInfo list) : (TocItem list * RenderedHeadingInfo list) =
-        printfn "Processing level %d with %d items" currentLevel (List.length items)
-
-        let mutable result = []
-        let mutable remaining = items
+    if List.isEmpty headings then
+        []
+    else
+        let minLevel = headings |> List.map (fun h -> h.level) |> List.min
         
-        while not remaining.IsEmpty && remaining.Head.level >= currentLevel do
-            let heading = remaining.Head
-            remaining <- remaining.Tail
+        // constructs ToC subtrees by consuming headings of the same or lower level.
+        // Returns the list of ToC subtrees and the remaining headings (that starts with a higher level).
+        let rec consumeSections (headings: RenderedHeadingInfo list) (level: int): TocItem list * RenderedHeadingInfo list =
+            let rec processHeadings (acc: TocItem list) (remaining: RenderedHeadingInfo list): TocItem list * RenderedHeadingInfo list =
+                match remaining with
+                | [] -> List.rev acc, []
+                | h :: rest when h.level = level ->
+                    let children, nextRemaining = consumeSections rest (level + 1)
+                    let item = { heading = h; children = children }
+                    processHeadings (item :: acc) nextRemaining
+                | h :: _ when h.level < level ->
+                    // We have reached a higher level heading, so we stop consuming.
+                    List.rev acc, remaining
+                | h :: _ ->
+                    failwithf "Unexpected heading level %d (%s), where current level = %d" h.level h.html level
             
-            if heading.level = currentLevel then
-                let (children, newRemaining) = processLevel (currentLevel + 1) remaining
-                result <- result @ [{heading = heading; children = children}]
-                remaining <- newRemaining
-                
-        result, remaining
-    
-    let tree, _ = processLevel 1 headings
-    tree
+            processHeadings [] headings
+        
+        let result, remaining = consumeSections headings minLevel
+        
+        assert (List.isEmpty remaining)
+
+        result
 
 // Convert ToC tree to HTML elements
 let rec tocItemToHtml (item: TocItem) : Html.Node =
