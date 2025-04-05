@@ -86,7 +86,7 @@ let layout (post: Lib.LocalizedPost) =
         else
             Html.div ["class", "toc-container"] [
                 Html.h2 [] [Html.Text "Table of Contents"]
-                tocToHtml tocTree
+                Html.nav [] [tocToHtml tocTree]
             ]
     
     Lib.layout (Some post.language) post.title (Some post.summary)([
@@ -101,7 +101,9 @@ let layout (post: Lib.LocalizedPost) =
         </h1>
         {Html.serialize None tocHtml}
         </header>
-        {post.body}
+        <div class="post-body">
+            {post.body}
+        </div>
     </article>
     <aside class="sidebar">
         {Html.serialize None tocHtml}
@@ -113,8 +115,7 @@ let layout (post: Lib.LocalizedPost) =
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/fsharp.min.js" integrity="sha512-S3tgSOL0xKKsqOdbPP7AZKtb/L0bXVG/PW7RNRVXOqCWEiBRzIq9oTIinLoY11MB58l1/f++IHM+mp1Nfk2ETA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>hljs.configure({{languages:[]}});hljs.highlightAll();</script>
         """
-    ]) ["/assets/post.css"] [
-        Html.DangerouslyInsertRawHtml ($"""
+    ]) ["/assets/post.css"] [Html.DangerouslyInsertRawHtml $"""
 <meta property="og:title" content="{post.title |> WebUtility.HtmlEncode}" />
 <meta property="og:description" content="{post.summary |> WebUtility.HtmlEncode}" />
 <meta property="og:site_name" content="pizzacat83's blog" />
@@ -123,71 +124,8 @@ let layout (post: Lib.LocalizedPost) =
 <meta property="article:published_time" content="{published}" />
 
 <link rel="canonical" href="{url}">
-""" + """
-<style>
-.content-wrapper {
-    display: flex;
-    gap: 2rem;
-    justify-content: center;
-    padding: 0 2rem;
-    @media (max-width: 600px) {
-        & {
-            padding: 0 1rem;
-        }
-    }
-}
-.sidebar {
-    width: 300px;
-    flex-shrink: 0;
-    position: sticky;
-    top: 1rem;
-    align-self: flex-start;
-    max-height: calc(100vh - 4rem);
-    overflow-y: auto;
-}
-.toc-container {
-    padding-left: 1rem;
-    font-weight: 400;
-}
-.toc-container h2 {
-    font-size: 1.2rem;
-    margin-top: 0;
-}
-ul.toc {
-    padding-left: 0;
-}
-.toc ul {
-    padding-left: 1rem;
-}
-.toc li {
-    list-style: none;
-}
-.toc a {
-    display: block;
-    margin: 0.2rem 0;
-    font-size: 0.7rem;
-    text-decoration: none;
-    color: #555;
-}
-.toc a:hover {
-    text-decoration: underline;
-    color: #000;
-}
-
-article .toc-container {
-    display: none;
-}
-
-@media (max-width: 64rem) {
-    .sidebar {
-        display: none;
-    }
-
-    article .toc-container {
-        display: block
-    }
-}
-</style>""" + (post.head |> Option.defaultValue ""))] "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
+{post.head |> Option.defaultValue ""}
+""" ] "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
 
 let langCode = function
     | Postloader.English -> "en"
