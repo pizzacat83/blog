@@ -1,12 +1,5 @@
 article {
-    width: calc(100% - 6rem);
     max-width: 40rem; /* One line contains 80 characters, you know? */
-    margin: 0 auto;
-    @media (max-width: 600px) {
-        & {
-            width: calc(100% - 2rem);
-        }
-    }
 
     .anchor {
         margin-left: 0.4rem;
@@ -82,7 +75,7 @@ article {
 
     @media (max-width: 600px) {
         code {
-            word-wrap: break-word;
+            word-break: break-all;
         }
     }
 }

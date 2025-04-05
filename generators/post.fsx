@@ -92,9 +92,6 @@ let layout (post: Lib.LocalizedPost) =
     Lib.layout (Some post.language) post.title (Some post.summary)([
         Html.DangerouslyInsertRawHtml $"""
 <div class="content-wrapper">
-    <aside class="sidebar">
-        {Html.serialize None tocHtml}
-    </aside>
     <article>   
         <header>
         <time datetime="{published}">{published}</time>
@@ -102,9 +99,13 @@ let layout (post: Lib.LocalizedPost) =
         <h1>
             {post.title}
         </h1>
+        {Html.serialize None tocHtml}
         </header>
         {post.body}
     </article>
+    <aside class="sidebar">
+        {Html.serialize None tocHtml}
+    </aside>
 </div>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css" integrity="sha512-hasIneQUHlh06VNBe7f6ZcHmeRTLIaQWFd43YriJ0UND19bvYRauxthDg8E4eVNPm9bRUhr5JGeqH7FRFXQu5g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -127,35 +128,44 @@ let layout (post: Lib.LocalizedPost) =
 .content-wrapper {
     display: flex;
     gap: 2rem;
+    justify-content: center;
+    padding: 0 2rem;
+    @media (max-width: 600px) {
+        & {
+            padding: 0 1rem;
+        }
+    }
 }
 .sidebar {
-    width: 250px;
+    width: 300px;
     flex-shrink: 0;
     position: sticky;
-    top: 2rem;
+    top: 1rem;
     align-self: flex-start;
     max-height: calc(100vh - 4rem);
     overflow-y: auto;
 }
 .toc-container {
-    font-size: 0.9rem;
-    border-left: 3px solid #ddd;
     padding-left: 1rem;
+    font-weight: 400;
 }
 .toc-container h2 {
     font-size: 1.2rem;
     margin-top: 0;
 }
-.toc {
-    padding-left: 1rem;
+ul.toc {
+    padding-left: 0;
 }
 .toc ul {
-    padding-left: 1.5rem;
+    padding-left: 1rem;
 }
 .toc li {
-    margin-bottom: 0.5rem;
+    list-style: none;
 }
 .toc a {
+    display: block;
+    margin: 0.2rem 0;
+    font-size: 0.7rem;
     text-decoration: none;
     color: #555;
 }
@@ -163,14 +173,18 @@ let layout (post: Lib.LocalizedPost) =
     text-decoration: underline;
     color: #000;
 }
-@media (max-width: 768px) {
-    .content-wrapper {
-        flex-direction: column;
-    }
+
+article .toc-container {
+    display: none;
+}
+
+@media (max-width: 64rem) {
     .sidebar {
-        width: 100%;
-        position: relative;
-        margin-bottom: 2rem;
+        display: none;
+    }
+
+    article .toc-container {
+        display: block
     }
 }
 </style>""" + (post.head |> Option.defaultValue ""))] "og: http://ogp.me/ns# article: http://ogp.me/ns/article#"
