@@ -6,7 +6,9 @@ summary: あのイーハトーヴォのすきとおった風、夏でも底に�
 # Go の iter.Seq, Rust の Iterator, JS の generator
 
 
-<!-- TODO: 書き出し -->
+**TL; DR**: [`iter` のドキュメント](https://pkg.go.dev/iter)と The Go Blog の [Range Over Function Types](https://go.dev/blog/range-functions) を読みましょう。
+
+---
 
 Go におけるイテレータは以下のように定義されている。
 
@@ -18,7 +20,7 @@ type Seq[V any] func(func(V) bool)
 
 あれ、これ普段「イテレータ」と読んでいるものとちょっと形が違わないか？
 
-私が見慣れているのは、Rust のイテレータのような流儀である。
+私が見慣れているのは、Rust の Iterator のような流儀である。
 
 ```rust
 trait Iterator {
@@ -29,7 +31,7 @@ trait Iterator {
 
 つまり、私の中で「イテレータ」と言えば、次の要素を返す `next: () -> Option<V>` というメソッドを持つ型であった。では、Go の `(V -> bool) -> ()` とは何なのか。私が見慣れていた「イテレータ」と本質的に同じものなのか、何かが違うのか。
 
-`V -> bool` をグッと睨むと、これが「for 文の中身」に見えてくる。`bool` とは、その回で break するか否かを表す。つまり、for 文の `break` を `return false` に、`continue` を `return true` に書き換えてやると、それが `iter.Seq` に渡される引数である。
+「型は体を表す」と言う諺があるように、`V -> bool` をグッと睨むと、これが「for 文の中身」に見えてくる。`bool` とは、その回で break するか否かを表す。つまり、for 文の `break` を `return false` に、`continue` を `return true` に書き換えてやると、それが `iter.Seq` に渡される引数である。
 
 ```go
 for i := range numbers {
@@ -79,7 +81,11 @@ for i := range concurrentSeq {
 
 [^misbehaving-iterator]: 正確には、「各反復が並列に実行される for 文」は「コールバックが `false` を返した場合にループを終了する」という `iter.Seq` の要請を満たしていないので、`iter.Seq` の妥当な実装ではない、と言うこともできる。
 
-なるほどね。Go の世界におけるイテレータとは、「for 文の意味を与えるもの」だったんだね。と思いながらようやく `iter` のドキュメントを読む。
+なるほど、Go の世界におけるイテレータとは、「for 文の意味を与えるもの」だったんだね、と思ったところで、Rust のような見慣れたイテレータとの差異について考えていく。
+
+
+
+ここでようやく `iter` のドキュメントを開く。
 
 ```go
 type Seq[V any] func(yield func(V) bool)
@@ -118,3 +124,12 @@ next: { value: 2, done: false }
 Yielding 3
 next: { value: 3, done: false }
 ```
+
+あっ
+
+```go
+func Pull[V any](seq Seq[V]) (next func() (V, bool), stop func())
+```
+
+
+Go では「計算を途中で止め、然るべき時に再開する」という制御が比較的簡単に、かつ軽量に実現できるからこそ、push-style iterator を採用できたのではないか。Go 以外の多くの言語はこれができないから、「途中まで計算したイテレータ」という概念を、各イテレータが自ら定義し実装する設計を選んだのではないか。
