@@ -83,6 +83,16 @@ for i := range concurrentSeq {
 
 なるほど、Go の世界におけるイテレータとは、「for 文の意味を与えるもの」だったんだね、と思ったところで、Rust のような見慣れたイテレータとの差異について考えていく。
 
+さて、物事に良い名前をつけると何かと取り回しが良い。Ranging Over Function Types では、Go の iter.Seq のような、(V -> bool) -> () によって定義されるイテレータを push iterator と呼び、Rust の Iterator のような、next: () -> Option<V> によって定義されるイテレータを pull iterator と呼んでいるので、ここでもこの用語を使っていく。
+
+一方で他方を実装できるかを考えてみよう。まず、pull iterator があるときに、それを push iterator のように使うことは容易にできる。以下の toPush 関数によって、pull iterator から push iterator を構成できる。
+
+<!-- TODO: code -->
+
+逆に push iterator があるときに、それを pull iterator のように使えるだろうか。
+
+<!-- TODO: code -->
+
 
 
 ここでようやく `iter` のドキュメントを開く。
@@ -131,5 +141,8 @@ next: { value: 3, done: false }
 func Pull[V any](seq Seq[V]) (next func() (V, bool), stop func())
 ```
 
+あ〜〜〜〜〜〜〜〜〜〜〜〜
+
+JS のジェネレータは、定義する側は push-style で、使う側は pull-style である。そして JS エンジンは、この2つのスタイルのギャップを埋める glue として捉えることができる。そして Go の iter.Pull もまた、push iterator を基に pull iterator を構成するものである。
 
 Go では「計算を途中で止め、然るべき時に再開する」という制御が比較的簡単に、かつ軽量に実現できるからこそ、push-style iterator を採用できたのではないか。Go 以外の多くの言語はこれができないから、「途中まで計算したイテレータ」という概念を、各イテレータが自ら定義し実装する設計を選んだのではないか。
