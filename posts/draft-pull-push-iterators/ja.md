@@ -141,8 +141,12 @@ next: { value: 3, done: false }
 func Pull[V any](seq Seq[V]) (next func() (V, bool), stop func())
 ```
 
-あ〜〜〜〜〜〜〜〜〜〜〜〜
+あ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜
 
-JS のジェネレータは、定義する側は push-style で、使う側は pull-style である。そして JS エンジンは、この2つのスタイルのギャップを埋める glue として捉えることができる。そして Go の iter.Pull もまた、push iterator を基に pull iterator を構成するものである。
+これまで push iterator の引数 V -> bool を「for 文の中身」と捉えていたが、これに yield という名をつけると、「push iterator とは、値を順に yield していくもの」という捉え方ができる。
+
+JS のジェネレータは、定義する側は push-style で、使う側は pull-style である。そして JS エンジンは、この2つのスタイルのギャップを埋める glue を提供していると捉えることができる。そして Go の iter.Pull もまた、push iterator を基に pull iterator を構成するものである。
+
+
 
 Go では「計算を途中で止め、然るべき時に再開する」という制御が比較的簡単に、かつ軽量に実現できるからこそ、push-style iterator を採用できたのではないか。Go 以外の多くの言語はこれができないから、「途中まで計算したイテレータ」という概念を、各イテレータが自ら定義し実装する設計を選んだのではないか。
