@@ -83,11 +83,30 @@ for i := range concurrentSeq {
 
 なるほど、Go の世界におけるイテレータとは、「for 文の意味を与えるもの」だったんだね、と思ったところで、Rust のような見慣れたイテレータとの差異について考えていく。
 
-さて、物事に良い名前をつけると何かと取り回しが良い。Ranging Over Function Types では、Go の iter.Seq のような、(V -> bool) -> () によって定義されるイテレータを push iterator と呼び、Rust の Iterator のような、next: () -> Option<V> によって定義されるイテレータを pull iterator と呼んでいるので、ここでもこの用語を使っていく。
+さて、物事に良い名前をつけると何かと取り回しが良い。Ranging Over Function Types では、Go の iter.Seq のような、(V -> bool) -> () によって定義されるイテレータを push iterator と呼び、Rust の Iterator のような、`next: () -> Option<V>` によって定義されるイテレータを pull iterator と呼んでいるので、ここでもこの用語を使っていく。
 
-一方で他方を実装できるかを考えてみよう。まず、pull iterator があるときに、それを push iterator のように使うことは容易にできる。以下の toPush 関数によって、pull iterator から push iterator を構成できる。
+一方で他方を実装できるかを考えてみよう。まず、pull iterator があるときに、それを push iterator のように使うことは容易にできる。以下の ToPush 関数は、`Next()` メソッドの結果を for 文の本体に適用することを繰り返すことで、pull iterator から push iterator を構成する。
 
-<!-- TODO: code -->
+```go
+type PullIter interface { func Next() (V, bool) }
+
+
+func [V any] ToPush(it PullIter[V]) iter.Seq[V] {
+	return func(loopBody func(V) bool) {
+		for {
+			v, ok := it.Next()
+			if !ok {
+				break
+			}
+			continue_ := loopBody(v)
+			if !continue_ {
+				break
+			}
+		}
+	}
+}
+```
+
 
 逆に push iterator があるときに、それを pull iterator のように使えるだろうか。
 
