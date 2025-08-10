@@ -1,6 +1,5 @@
 ---
-draft: true
-published: 2025-08-09
+published: 2025-08-10
 summary: Go の iter.Seq の定義は、見慣れないもののようで、見慣れていて、見慣れていた。
 ---
 # Go の iter.Seq, Rust の Iterator, JS の generator
