@@ -9,6 +9,14 @@ article {
         margin-bottom: 1em;
     }
 
+    hr {
+        margin: 1em 0 1em 0;
+    }
+
+    code {
+        tab-size: 4;
+    }
+
     @media (max-width: 600px) {
         pre {
             overflow-x: auto;
