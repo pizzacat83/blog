@@ -198,7 +198,13 @@ let internal renderFootnotes (ctx: FormattingContext) =
             |> Seq.mapi (fun i kvp -> (i+1, kvp.Key, kvp.Value))
             |> Seq.sortBy (fun (i,_,_) -> i)
 
-        for (i, id, (content, originalRef)) in orderedFootnotes do
+        for (i, id, (contentMd, originalRef)) in orderedFootnotes do
+            // Unfortunately the parser of FSharp.Formatting parses the footnote content as plaintext, not Markdown.
+            // This is a dirty hack to render the footnote content as Markdown.
+            // Ideally the content should be parsed as a span, not a paragraph,
+            // but this dirty hack results in content surrounded by <p>.
+            let content = FSharp.Formatting.Markdown.Markdown.ToHtml(contentMd)
+
             ctx.Writer.Write(sprintf "<li id=\"fn%d\"><p>" i)
             
             // Output the footnote content
