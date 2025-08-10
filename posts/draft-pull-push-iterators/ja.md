@@ -60,13 +60,13 @@ numbers(func (i int) bool {
 
 つまり、Go の `iter.Seq` とは「for 文で回せるやつ」である、と言える。こうしてみると、`(V -> bool) -> ()` とは、for 文の意味を定めるものと捉えることができる。
 
-普通のイテレータは for 文にまともな意味を与えるけれど、その気になれば、「各反復が並列に実行される for 文」も、`(V -> bool) -> ()` で表現できる。[^misbehaving-iterator] ただ残念ながら (幸い?) 実行時のチェックがあるようで、このような異常なイテレータは panic を起こす。
+普通のイテレータは for 文にまともな意味を与えるけれど、その気になれば、「各反復が並列に実行される for 文」も、`(V -> bool) -> ()` で表現できる[^misbehaving-iterator]。 ただ残念ながら (幸い?) いくつか実行時のチェックがあり、このような異常なイテレータは panic を起こす。
 
 ```go
-concurrentSeq := func(f func(int) bool) {
+concurrentSeq := func(loopBody func(int) bool) {
 	items := []int{1, 2, 3, 4, 5}
 	for i := range items {
-		go f(i)
+		go loopBody(i)
 	}
 }
 
@@ -83,13 +83,12 @@ for i := range concurrentSeq {
 
 なるほど、Go の世界におけるイテレータとは、「for 文の意味を与えるもの」だったんだね、と思ったところで、Rust のような見慣れたイテレータとの差異について考えていく。
 
-さて、物事に良い名前をつけると何かと取り回しが良い。Ranging Over Function Types では、Go の iter.Seq のような、(V -> bool) -> () によって定義されるイテレータを push iterator と呼び、Rust の Iterator のような、`next: () -> Option<V>` によって定義されるイテレータを pull iterator と呼んでいるので、ここでもこの用語を使っていく。
+さて、物事に良い名前をつけると何かと取り回しが良い。The Go Blog の `iter.Seq` のリリース紹介記事『[Range Over Function Types](https://go.dev/blog/range-functions)』では、Go の iter.Seq のような、(V -> bool) -> () によって定義されるイテレータを push iterator と呼び、Rust の Iterator のような、`next: () -> Option<V>` によって定義されるイテレータを pull iterator と呼んでいるので、ここでもこの用語を使っていく。
 
 この2種類のイテレータ定義には、「できること」の違いはあるのだろうか。まず、push iterator に対してできることは、pull iterator に対してもできる。以下の ToPush 関数は、`Next()` メソッドの結果を for 文の本体に適用することを繰り返すことで、pull iterator から push iterator を構成する[^pull-iter-stop]。
 
 ```go
-type PullIter interface { func Next() (V, bool) }
-
+type PullIter[V any] interface { Next() (V, bool) }
 
 func ToPush[V any](it PullIter[V]) iter.Seq[V] {
 	return func(loopBody func(V) bool) {
@@ -131,24 +130,26 @@ func SumPair_Pull(it PullIter[int]) []int {
 
 `iter.Seq` の引数となる関数を「for 文の中身」と捉えると、要は上のプログラムを、`for v := range it { ... }` に書き換えればよい。うーむ。
 
+えいっ
+
 ```go
 func SumPair_Push(it iter.Seq[int]) []int {
 	var sums []int
 	var v0 int
-	isEvenIndex := false
+	isEvenIndex := true
 	for v := range it {
 		if isEvenIndex {
 			v0 = v
 		} else {
 			sums = append(sums, v0+v)
 		}
-		isEvenIndex += 1
+		isEvenIndex = !isEvenIndex
 	}
 	return sums
 }
 ```
 
-すると、`it` の引数となる関数は以下のようになる。
+つまり、`it` の引数となる関数は以下のようになる。
 
 ```go
 func loopBody(v int) bool {
@@ -157,14 +158,13 @@ func loopBody(v int) bool {
 	} else {
 		sums = append(sums, v0+v)
 	}
-	isEvenIndex += 1
+	isEvenIndex = !isEvenIndex
 	return true
 }
 ```
 
 これは、元の `SumPair_Pull` の処理を、「`it.Next` が呼ばれてから次に `it.Next` が呼ばれるまで」で区切って貼り合わせたもの、と捉えることができる。
-
-<!-- TODO: 図? -->
+![push iterator 版と pull iterator 版の SumPair 実装の対応](./sumpair_two_styles.png)
 
 別の言い方をするならば、元の pull iterator 版のプログラムは一続きの処理であるように見えるが、push iterator を使うためには、「元々 `it.Next` が呼ばれていた箇所で `loopBody` 関数を抜け、`iter.Seq` に処理を戻す。次の値に対して `loopBody` 関数が呼ばれると、`it.Next` の返り値を受け取った後の処理を再開する」という構造にする必要がある。元々の一続きの流れを `return` で中断、`call` で再開できるように、中断した時の状態を持っておかなければならない。この状態をより明示的に書くと以下のように表現できる。
 
@@ -182,17 +182,17 @@ func (self *SumPair_Push) LoopBody(v int) bool {
 	} else {
 		self.sums = append(self.sums, v0+v)
 	}
-	self.isEvenIndex += 1
+	self.isEvenIndex = !self.isEvenIndex
 	return true
 }
 ```
 
 ということで、pull iterator を扱う関数 `SumPair_Pull` と同じ挙動をするような、push iterator に対する関数 `SumPair_Push` をなんとか書くことができた。
 
-また別の例を考えてみよう。Range Over Function Types でも取り上げられている、2つのイテレータの要素の等しさを返す関数である。これは、pull iterator では簡単に実装できる。
+また別の例を考えてみよう。『Range Over Function Types』でも取り上げられている、2つのイテレータの要素の等しさを返す関数である。これは、pull iterator では簡単に実装できる。
 
 ```go
-func Eq_Pull[V comparable](it1, it2 iter.Seq[V]) bool {
+func Eq_Pull[V comparable](it1, it2 PullIter[V]) bool {
 	for {
 		v1, ok1 := it1.Next()
 		v2, ok2 := it2.Next()
@@ -209,14 +209,14 @@ func Eq_Pull[V comparable](it1, it2 iter.Seq[V]) bool {
 
 ```go
 it1 := func(loopBody func(int) bool) {
-	for x in range []int{1,2,3} {
+	for _, x := range []int{1,2,3} {
 		continue_ := loopBody(x)
 		if !continue_ { break }
 	}
 }
 
 it2 := func(loopBody func(int) bool) {
-	for x in range []int{1,100,3} {
+	for _, x := range []int{1,100,3} {
 		continue_ := loopBody(x)
 		if !continue_ { break }
 	}
@@ -277,7 +277,7 @@ func Pull[V any](seq Seq[V]) (next func() (V, bool), stop func())
 
 あ〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜〜
 
-これまで push iterator の引数 V -> bool を「for 文の中身」と捉えていたが、これに yield という名をつけると、「push iterator とは、値を順に yield していくもの」という捉え方ができる。「for 文に意味を与える」「与えられた『for 文の中身』をよしなに実行する」というメンタルモデルではなく、「とにかく自分が出したい値を yield する (受け取り手が何であるかは特に考えない)」というメンタルモデルである。
+これまで push iterator の引数 `V -> bool` を「for 文の中身」と捉えていたが、これに `yield` という名をつけると、「push iterator とは、値を順に yield していくもの」という捉え方ができる。「for 文に意味を与える」「与えられた『for 文の中身』をよしなに実行する」というメンタルモデルではなく、「とにかく自分が出したい値を yield する (受け取り手が何であるかは特に考えない)」というメンタルモデルである。
 
 このメンタルモデルをもとに、イテレータを定義する側の視点に立ってみると、「push iterator では実装しやすいが、pull iterator では実装しにくいもの」がいくつか思い浮かぶ。
 
@@ -290,9 +290,9 @@ func Triangular_Push(yield func(int) bool) {
 	n := 0
 	for {
 		n += 1
-		for i in range n {
+		for i := range n {
 			continue_ := yield(n)
-			if !continue_ { break }
+			if !continue_ { return }
 		}
 	}
 }
@@ -317,7 +317,7 @@ func (self *Triangular_Pull) Next() (int, bool) {
 
 ところでここでは Triangular という人工的な例を挙げたけれど、この時私は、過去色々コーディングしていた中で pull iterator の実装がぐちゃっとなっていたときのことを思い出し、あの時 push iterator でよければ綺麗に実装できたのか、と思いを馳せていた。
 
-例えば、[Rust 製自作ブラウザ sabatora の HTML 字句解析器](https://pizzacat83.hatenablog.com/entry/2025/01/10/172345) ([GitHub](https://github.com/pizzacat83/sabatora/blob/a5f8716452ab077028397e2587e4215ab271a506/saba_core/src/renderer/html/token.rs#L41-L45))は `yielded_tokens` という状態を持つが、これは HTML Standard の字句解析の仕様における「1ステップ」が0個以上のトークンが出力しうるのに対して、pull iterator である Rust の Iterator trait の `next` メソッドはちょうど1個の要素またはイテレータの終了を返す必要がある、というギャップを埋めるためのバッファである。
+例えば、[Rust 製自作ブラウザ sabatora の HTML 字句解析器](https://pizzacat83.hatenablog.com/entry/2025/01/10/172345) ([code](https://github.com/pizzacat83/sabatora/blob/a5f8716452ab077028397e2587e4215ab271a506/saba_core/src/renderer/html/token.rs#L41-L45)) は `yielded_tokens` という状態を持つが、これは HTML Standard の字句解析の仕様における「1ステップ」が0個以上のトークンが出力しうるのに対して、pull iterator である Rust の Iterator trait の `next` メソッドはちょうど1個の要素またはイテレータの終了を返す必要がある、というギャップを埋めるためのバッファである。
 
 ```rust
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -357,8 +357,53 @@ impl Iterator for HtmlTokenizer {
 
 話を戻すと、push iterator と pull iterator に対して以下の直感が得られた。Push iterator は出力側の実装が楽で、受け取り側の実装が時々つらい。Pull iterator は受け取り側の実装が楽で、出力側の実装が時々つらい。「つらい」というのは、値を入出力する一連の流れを、受け渡しのタイミングで中断・再開できるよう、流れの途中の状態をモデル化し、1反復分ごとに return するような関数を記述する必要があることである。
 
-流れの途中の状態は自然と導けるときもあるし、そうでないときもある。しかし実現したい処理のメンタルモデルが「一続きの流れ」であるならば、途中で中断した際の状態をモデリングすることなくメンタルモデルをそのまま記述できた方が望ましい。
+流れの途中の状態は自然と導けるときもあるし、そうでないときもある。しかし実現したい処理のメンタルモデルが「一続きの流れ」であるならば、途中で中断した際の状態をモデリングすることなくメンタルモデルをそのまま記述できた方が嬉しい。
 
-ここで JS のジェネレータに思いを馳せると、ジェネレータを定義する側は push-style、使う側は pull-style であり、双方にとって楽な形態で処理を記述できるようにしている。そして JS エンジンは、この2つのスタイルのギャップを埋める glue を提供していると捉えることができる。そして Go の iter.Pull もまた、push iterator を基に pull iterator を構成するものである。
+ここで JS のジェネレータに思いを馳せると、ジェネレータを定義する側は push-style、使う側は pull-style であり、双方にとって楽な形態で処理を記述できるようにしている。そして JS エンジンは、この2つのスタイルのギャップを埋める glue を提供していると捉えることができる。そして Go の `iter` パッケージに含まれている `Pull` 関数もまた、push iterator を基に pull iterator を構成するものである。
 
-<!-- TODO -->
+```go
+func Pull[V any](seq Seq[V]) (next func() (V, bool), stop func())
+```
+
+この関数をチャンネルを使って実装したもの (に近いもの) が『Range Over Function Types』に載っている[^go-pull-actual-impl]。直感的には、出力側と受け取り側を別の goroutine で並行に動かし、チャンネルを使って適宜処理をブロックするものである。
+
+```go
+func Pull[V any](seq Seq[V]) (func() (V, bool), func()) {
+    ch := make(chan V)
+    stopCh := make(chan bool)
+
+    go func() {
+        defer close(ch)
+        for v := range seq {
+            select {
+            case ch <- v:
+            case <-stopCh:
+                return
+            }
+        }
+    }()
+
+    next := func() (V, bool) {
+        v, ok := <-ch
+        return v, ok
+    }
+
+    stop := func() {
+        close(stopCh)
+    }
+
+    return next, stop
+}
+```
+
+[^go-pull-actual-impl]: なお、上記のコードは実際の `iter.Pull` の実装とは一致しない。実際の実装はより最適化されていて、[`runtime/coro.go`](https://go.dev/src/runtime/coro.go) で定義されている coroutine を使っている。この coroutine は [`seq.Iter` のために追加された](https://github.com/golang/go/commit/a9c9cc07ac0d3dc73865a57e6ce45c22ada3b5c9)機構であるようだ。
+
+こうしてみると、Go がイテレータの定義として push iterator を採用したことにも合点がいく。Go のイテレータの世界観とは、「イテレータを実装する側には、push iterator で楽に実装してもらう。要素を受け取る側は、for 文でよければ push iterator のまま使ってもらい、pull iterator を使いたい場合は `iter.Pull` で変換してもらう」というものだと解釈した。`iter.Pull` による変換は軽量とはいえゼロコストではないから、世の中に push iterator 派と pull iterator 派が入り交じると、データフローの中で push → pull → push → … のような無駄な多重変換が起きそうだから、両方を対等に扱うのではなくどちらか一方を convention として決めておくことに理がある。
+
+とはいえ、このような世界観はすべての言語で採用されているわけではない。その理由として私が思うのは、`iter.Pull` の振る舞いを受け容れることもまた、時として挑戦的な決断であるからだと思う。Go ではチャンネルによる `iter.Pull` の簡潔な実装ができたように、並行計算の概念が空気のように浸透していて、このような振る舞いをする「関数」は特に違和感なく受け容れられる。一方 Rust はそうではないと思っている (この直感はうまく言語化できない) し、ゼロコスト抽象を好む。だから、`trait Iterator` は要素を受け取る側に優しいインターフェースとしての pull iterator になっているのは理にかなっていると思う。JS は非同期処理機構を持つけれど、処理を中断できる箇所は構文的に制約されていて (`await` など)、それ以外の箇所では処理が中断されずに進む振る舞いが期待されている。だから JS は「出力側は push iterator として定義し、受け取り側は pull iterator として使う」を実現する際に、 `function*()` と `yield` という専用の構文を提供し、「中断可能な関数」という特殊な振る舞いを持つ概念を限定的に導入したのだと私は思う。
+
+ちなみに、[Go Wiki: Rangefunc Experiment](https://go.dev/wiki/RangefuncExperiment) を読むと、for 文の中で panic や defer が起きた場合にどうなるかなどが書かれていて、これまた面白い。
+
+そんなわけで、Go の `iter.Seq` に対するいいメンタルモデルが得られたし、JS の generator への理解も深まった気がする。そして push iterator と pull iterator をつなぐ glue が利用できない言語において、どちらのスタイルで書くべきかの指針も得られた。
+
+ところでここまで考えた結果今度は「処理を中断・再開できる」という仕組みの内部に興味が湧いてきてしまった。非同期ランタイムを実装してみたい。やるか、`std::future::Future` 自作。
