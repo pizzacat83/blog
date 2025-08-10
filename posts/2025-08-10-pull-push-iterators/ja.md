@@ -242,14 +242,14 @@ type Seq[V any] func(yield func(V) bool)
 
 ```js
 function* generator() {
-	console.log("Yielding 1")
-	yield 1
+  console.log("Yielding 1")
+  yield 1
 
-	console.log("Yielding 2")
-	yield 2
+  console.log("Yielding 2")
+  yield 2
 
-	console.log("Yielding 3")
-	yield 3
+  console.log("Yielding 3")
+  yield 3
 }
 
 const gen = generator()
