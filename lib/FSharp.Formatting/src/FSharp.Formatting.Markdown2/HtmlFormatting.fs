@@ -205,6 +205,11 @@ let internal renderFootnotes (ctx: FormattingContext) =
             // but this dirty hack results in content surrounded by <p>.
             let content = FSharp.Formatting.Markdown.Markdown.ToHtml(contentMd)
 
+
+            let content =
+                let m = Regex.Match(content, "^\s*<p>(.+)</p>\s*$")
+                if m = null then content else m.Groups[1].Value
+
             ctx.Writer.Write(sprintf "<li id=\"fn%d\"><p>" i)
             
             // Output the footnote content
