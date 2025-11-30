@@ -1,5 +1,4 @@
 ---
-draft: true
 published: 2025-12-01
 summary: Mutation XSS を利用した DOMPurify < 2.0.1 のバイパス (CVE-2019-16728・CVE-2020-6413) のメカニズムを、HTML パーサーの仕様・実装を読み解きながら理解する。How よりも Why に焦点を当てた解説の試み。
 ---
