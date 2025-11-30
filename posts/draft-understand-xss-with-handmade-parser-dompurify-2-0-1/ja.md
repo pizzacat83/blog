@@ -49,7 +49,7 @@ cargo test --package saba_core --lib --renderer::html::parser::tests::test_cve_2
 
 本題に戻ると、DOMPurify は、大まかに以下の流れでサニタイズを行う。
 
-1. ブラウザの API ([`DOMParser`](http://developer.mozilla.org/ja/docs/Web/API/DOMParser) 等) を利用して、テキストから DOM ツリーを得る ([実装](https://github.com/cure53/DOMPurify/blob/4c8ca9db5b4b2a79ed6c779ac6f22587ba16a3e1/src/purify.js#L461-L549)))
+1. ブラウザの API ([`DOMParser`](http://developer.mozilla.org/ja/docs/Web/API/DOMParser) 等) を利用して、テキストから DOM ツリーを得る ([実装](https://github.com/cure53/DOMPurify/blob/4c8ca9db5b4b2a79ed6c779ac6f22587ba16a3e1/src/purify.js#L461-L549))
 2. DOM ツリーを解析し、危険な要素・属性の削除などを行い、無害化された DOM ツリーを構築する
 3. ブラウザの API (`.innerHTML` 等) を利用して、無害化された DOM ツリーを文字列に変換する ([実装](https://github.com/cure53/DOMPurify/blob/4c8ca9db5b4b2a79ed6c779ac6f22587ba16a3e1/src/purify.js#L1113))
 
@@ -143,7 +143,7 @@ cargo test --package saba_core --lib --renderer::html::parser::tests::test_cve_2
 <svg><style><a id="</style><img src=1 onerror=alert(1)>"></svg>
 ```
 
-この `</style>` は `a` タグの `id` 属性として解釈される。
+この `</style>` は `a` タグの `id` 属性として解釈される ([AST Explorer](https://astexplorer.net/#/gist/809898651ef83ef5348a15a0d1076cb7/76ed5f463d8693c35e5f87c357a46f7ced1c4c96))。
 
 - `svg`
 	- `style`
@@ -318,7 +318,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 <svg><p></p>aaa</svg>
 ```
 
-パース結果:
+パース結果 ([AST Explorer](https://astexplorer.net/#/gist/63c3741ff1c80126fe2e7da13d482351/5065e892682a9426ca91d3ab0a262315b6cf4da8)):
 
 - `svg`
 - `p`
@@ -338,7 +338,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 <svg><p></svg>
 ```
 
-パース結果:
+パース結果 ([AST Explorer](https://astexplorer.net/#/gist/7e07aa759d2977f5ab96ed848dcb9f75/ee098656ed6b73afc1adcf1d4c0d6a8ed645f8f5)):
 
 - `svg`
 - `p`
@@ -349,7 +349,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 <svg></p>aaa</svg>
 ```
 
-パース結果:
+パース結果 ([AST Explorer](https://astexplorer.net/#/gist/5477f818981d4b05ae777dcce895c5cf/0d9280dbea160231c6c3fd5b733593e2dc2a8e4a)):
 
 - `svg`
 	- `p`
@@ -363,7 +363,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 <svg><p></p>aaa</svg>
 ```
 
-さらにこれをパースすると、もちろん今度は `p` が `svg` の兄弟となる:
+さらにこれをパースすると、もちろん今度は `p` が `svg` の兄弟となる ([AST Explorer](https://astexplorer.net/#/gist/63c3741ff1c80126fe2e7da13d482351/5065e892682a9426ca91d3ab0a262315b6cf4da8)):
 
 - `svg`
 - `p`
