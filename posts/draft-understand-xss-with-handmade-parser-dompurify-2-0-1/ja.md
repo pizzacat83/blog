@@ -28,7 +28,7 @@ function safelySetInnerHTML(dangerousHTML) {
 }
 ```
 
-しかし `dangerousHTML` として以下の文字列を与えると、(当時の Chrome と DOMPurify 2.0.0 以前において、)`alert(1)` が実行されてしまうのだ。
+しかし `dangerousHTML` として以下の文字列を与えると、(当時の Chrome と DOMPurify 2.0.0 以前において、) `alert(1)` が実行されてしまうのだ。
 
 ```
 <svg></p><style><a id="</style><img src=1 onerror=alert(1)>">
@@ -40,7 +40,7 @@ function safelySetInnerHTML(dangerousHTML) {
 
 今回の脆弱性報告を受けて HTML パーサーの仕様・実装が修正されたため、お手持ちのブラウザでこの振る舞いを再現することはできないが、修正前の仕様に基づくパーサーの挙動を手軽に観察するには、parser5 の古いバージョン (< 7.0.0) を使うのが良いだろう。[AST Explorer](http://astexplorer.net/#/1CHlCXc4n4) (parse5 6.0.0)を片手に読み進めていくことを推奨する。
 
-もちろん私の自作 HTML パーサーで以下の振る舞いを観察することもできるが、まあ手軽なのは環境構築不要の AST Explorer だろう。もし私の自作 HTML パーサーで観察してみたいならば、以下を実行してみよう。なお私の HTML パーサーはまだ HTML Standard 完全準拠ではなく、HTML によってはパーサーが panic する場合があることを了承いただきたい。
+もちろん私の自作 HTML パーサーで以下の振る舞いを観察することもできるが、まあ手軽なのは環境構築不要の AST Explorer だろう。もし私の自作 HTML パーサーで観察してみたいならば、以下のコマンドで試せる。なお私の HTML パーサーはまだ HTML Standard 完全準拠ではなく、入力 HTML によってはパーサーが panic する場合があることを了承いただきたい。
 
 ```sh
 git clone --depth 1 --branch blog-mxss-dompurify-2-0-1 https://github.com/pizzacat83/sabatora.git # main ブランチは最新の HTML Standard 準拠を目指しているため、代わりに古い仕様のパーサーがあるタグをチェックアウトする
@@ -60,8 +60,10 @@ cargo test --package saba_core --lib --renderer::html::parser::tests::test_cve_2
 ```
 
 このペイロードには2点、奇妙な部分がある。
+
 - 閉じタグ `</p>` が突如出てくる
 - `<a>` タグの `id` 属性に `</style>` が出現する
+
 これらの振る舞いに注目しながら処理の流れを追っていく。
 
 まずこの HTML をパースすると以下の DOM ツリーが得られる ([AST Explorer](https://astexplorer.net/#/gist/10fcc967e9361171c97dbb4c0ec6ad2c/83ccf1216469343b2672ea57d4025f2e470c3f41)):
@@ -160,10 +162,14 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 > Raw text elements can have text, though it has restrictions described below.
 > ([HTML Standard 13.1.2](https://html.spec.whatwg.org/multipage/syntax.html#foreign-elements:~:text=Raw%20text%20elements%20can%20have%20text%2C%20though%20it%20has%20restrictions%20described%20below.))
 >
-> The text in raw text and escapable raw text elements must not contain any occurrences of the string "</" (U+003C LESS-THAN SIGN, U+002F SOLIDUS) followed by characters that case-insensitively match the tag name of the element followed by one of U+0009 CHARACTER TABULATION (tab), U+000A LINE FEED (LF), U+000C FORM FEED (FF), U+000D CARRIAGE RETURN (CR), U+0020 SPACE, U+003E GREATER-THAN SIGN (>), or U+002F SOLIDUS (/).
+> The text in raw text and escapable raw text elements must not contain any occurrences of the string "`</`" (U+003C LESS-THAN SIGN, U+002F SOLIDUS) followed by characters that case-insensitively match the tag name of the element followed by one of U+0009 CHARACTER TABULATION (tab), U+000A LINE FEED (LF), U+000C FORM FEED (FF), U+000D CARRIAGE RETURN (CR), U+0020 SPACE, U+003E GREATER-THAN SIGN (`>`), or U+002F SOLIDUS (`/`).
+> 
 > ([HTML Standard 13.1.2.6](https://html.spec.whatwg.org/multipage/syntax.html#cdata-RAWTEXT-restrictions))
 
+<!-- -->
+
 > Foreign elements (中略) can have text, character references, CDATA sections, **other elements**, and comments, but the text must not contain the character U+003C LESS-THAN SIGN (<) or an ambiguous ampersand.
+> 
 > ([HTML Standard 13.1.2](https://html.spec.whatwg.org/multipage/syntax.html#foreign-elements:~:text=Foreign%20elements%20whose%20start%20tag%20is%20not%20marked%20as%20self%2Dclosing%20can%20have%20text%2C%20character%20references%2C%20CDATA%20sections%2C%20other%20elements%2C%20and%20comments%2C%20but%20the%20text%20must%20not%20contain%20the%20character%20U%2B003C%20LESS%2DTHAN%20SIGN%20(%3C)%20or%20an%20ambiguous%20ampersand.), 強調は引用者による)
 
 すなわち、HTML 名前空間の `<style>` 要素は、内部にテキストを持てるが子要素は持てない。`<a id="` の部分は子要素ではなく単なるテキストコンテンツとして解釈され、`</style>` によって `style` 要素が閉じられた。
@@ -181,10 +187,12 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 さて、SVG の内外によって処理が分岐するのは、tree construction stage の仕様の冒頭である。
 
 > As each token is emitted from the tokenizer, the user agent must follow the appropriate steps from the following list, known as the tree construction dispatcher:
+> 
 > - (中略) If the adjusted current node is an element **in the HTML namespace** (中略)
 >     - Process the token according to the rules given in the section corresponding to the current insertion mode in HTML content.
 > - **Otherwise**
 > 	- Process the token according to the rules given in the section for parsing tokens in foreign content.
+> 
 > ([HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#tree-construction-dispatcher), 強調は引用者による)
 
 これは、tokenization stage が出力したトークンをどのように処理するかに関する規定である。
@@ -194,20 +202,25 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 まずは HTML 名前空間の要素の中にいる場合の仕様を見ていこう。構文解析器は 21 種類の「挿入モード (insertion mode)」を遷移しながらトークンを処理していく。挿入モードはたくさんあるが、`<style>` 開始タグが出現した際は大抵色々たらい回しにされたのちに "in head" mode に辿り着くので、ここを読めば良い。(HTML パーサーの実装が手元にある人は、デバッガのステップ実行等で状態遷移の流れも見てみると簡単に流れを追えるだろう。HTML パーサーの実装とは、型推論・コードジャンプ・ステップ実行ができるようになった HTML パーサーの仕様書である (?))
 
 > 13.2.6.4.4 The "in head" insertion mode
+> 
 > When the user agent is to apply the rules for the "in head" insertion mode, the user agent must handle the token as follows:
+> 
 > - (略; タグの名前に基づく大量の分岐)
 > - A start tag whose tag name is one of: "noframes", "style"
 >     - Follow the generic raw text element parsing algorithm.
 > - (略)
+> 
 > ([HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#current-node:~:text=A%20start%20tag%20whose%20tag%20name%20is%20one%20of%3A%20%22noframes%22%2C%20%22style%22))
 
 ここで、 "the generic raw text element parsing algorithm" は以下のように規定されている。
 
 > The generic raw text element parsing algorithm (略) consist of the following steps. (略)
+> 
 > 1. Insert an HTML element for the token.
 > 2. (中略) **switch the tokenizer to the RAWTEXT state**; (略)
 > 3. Set the original insertion mode to the current insertion mode.
 > 4. Then, switch the insertion mode to "text".
+> 
 > ([HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#generic-raw-text-element-parsing-algorithm), 強調は引用者による)
 
 なんとここで、構文解析器が字句解析器の状態を上書きするのだ！
@@ -217,7 +230,9 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 というわけで今度は、SVG 名前空間の要素の中にいる場合に、`<style>` 開始タグがどう処理されるかを見ていく。件の "the section for parsing tokens in foreign content" には以下のように定義されている。
 
 > 13.2.6.5 The rules for parsing tokens in foreign content
+> 
 > When the user agent is to apply the rules for parsing tokens in foreign content, the user agent must handle the token as follows:
+> 
 > - (略)
 > - Any other start tag
 > 	- (略)
@@ -273,7 +288,7 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 | RAWTEXT end tag name   | `s`                 | RAWTEXT end tag name   |                         | end tag<br>name: `s`     |                             |
 | RAWTEXT end tag name   | `t` `y` `l` `e`     | RAWTEXT end tag name   |                         | end tag<br>name: `style` | どの文字も同じ遷移をするので、この表では1行にまとめた |
 | RAWTEXT end tag name   | `>`                 | data                   | end tag<br>tag: `style` |                          |                             |
-RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉じタグ `</style>` が登場するまでは、全てが単なる文字を表すトークンとして認識される。特に、`<a id="...` の字句解析では、まず先頭にある `<` は `</style>` の先端かもしれないので、RAWTEXT less-than sign という状態に遷移し `/` を待ち受ける。しかしその次の文字は `/` ではなく `a` だったので、先ほどの `<` は単なる文字だったのだと文字トークン `<` を出力し、RAWTEXT 状態に戻ってしまう。その後の ` id="` も単なる文字の並びとして扱われる。そして `</style>` に到達し、これが閉じタグとして出力されるのである。
+RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉じタグ `</style>` が登場するまでは、全てが単なる文字を表すトークンとして認識される。特に、`<a id="...` の字句解析では、まず先頭にある `<` は `</style>` の先端かもしれないので、RAWTEXT less-than sign という状態に遷移し `/` を待ち受ける。しかしその次の文字は `/` ではなく `a` だったので、先ほどの `<` は単なる文字だったのだと文字トークン `<` を出力し、RAWTEXT 状態に戻ってしまう。その後の <code>&nbsp;id=&quot;</code> も単なる文字の並びとして扱われる。そして `</style>` に到達し、これが閉じタグとして出力されるのである。
 
 というわけで、以下の HTML は SVG の内外どちらにあるかによって、「`style` タグの中に `a` タグ」「`style` タグの兄弟となる `img` タグ」という異なるパース結果になるのだ。
 
@@ -304,6 +319,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 ```
 
 パース結果:
+
 - `svg`
 - `p`
 - \#text: `aaa`
@@ -312,7 +328,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 
 つまり、`<svg><p></p>aaa</svg>` の `<p></p>aaa` が「後ろに移動して」`<svg></svg> <p></p>aaa` になったわけではない。`<p>` の直前に `</svg>` が隠れていると解釈され、`<svg></svg><p></p>aaa</svg>` のように見なされたのだ。ここで、末尾の `</svg>` は無効な閉じタグとして無視される。
 
-![[p-in-svg.png]]
+![](p-in-svg.png)
 
 なぜ`<p>` の前で `svg` 要素が暗黙的に閉じられるかというと、これは恐らく、「SVG の仕様に存在しないが HTML に存在するタグが出現した場合に、『その直前で SVG を閉じ忘れた』のだと推定してパースを続行する」という意図で制定された仕様ではないかと思う。[SVG の仕様](https://www.w3.org/TR/SVG/struct.html#SVGElement)を読むと、`svg` 要素のコンテンツモデルには `a` 要素など限られた要素のみが含まれており、確かに `p` 要素は `svg` 要素の子になれない (というより、SVG 名前空間において `p` という要素は定義されていない)。なお、この仕様の詳細は少し後で深掘りしていく。
 
@@ -323,6 +339,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 ```
 
 パース結果:
+
 - `svg`
 - `p`
 
@@ -333,6 +350,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 ```
 
 パース結果:
+
 - `svg`
 	- `p`
 	- \#text: `aaa`
@@ -346,6 +364,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 ```
 
 さらにこれをパースすると、もちろん今度は `p` が `svg` の兄弟となる:
+
 - `svg`
 - `p`
 - \#text: `aaa`
@@ -357,7 +376,9 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 まずは、開始タグ`<p>` が登場する場合 (`<svg><p></p>aaa</svg>` など) の仕様を見ていく。今は SVG 名前空間の中にいるので、["the section for parsing tokens in foreign content"](https://web.archive.org/web/20210622212326/https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign) に従う。
 
 > 13.2.6.5 The rules for parsing tokens in foreign content
+> 
 > When the user agent is to apply the rules for parsing tokens in foreign content, the user agent must handle the token as follows:
+>
 > - (略)
 > - A start tag whose tag name is one of: "b", "big", "blockquote", "body", "br", "center", "code", "dd", "div", "dl", "dt", "em", "embed", "h1", "h2", "h3", "h4", "h5", "h6", "head", "hr", "i", "img", "li", "listing", "menu", "meta", "nobr", "ol", **"p"**, "pre", "ruby", "s", "small", "span", "strong", "strike", "sub", "sup", "table", "tt", "u", "ul", "var"
 > - A start tag whose tag name is "font", if the token has any attributes named "color", "face", or "size"
@@ -365,6 +386,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 > 	  While the current node is not a MathML text integration point, an HTML integration point, or an element in the HTML namespace, pop elements from the stack of open elements.  
 > 	  Process the token using the rules for the "in body" insertion mode.
 > - (略)
+> 
 > ([HTML Standard](https://web.archive.org/web/20210622212326/https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign), 強調は引用者による)
 
 すなわち、`p` などの開始タグを受け取ると、パーサーは HTML 名前空間に戻ってくるまで、まだ閉じていない要素を閉じてゆく。HTML 名前空間に戻ってきたら、そのタグを HTML 名前空間に適用される規則でパースしていく。
@@ -382,6 +404,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 > 		5. Set node to the previous entry in the stack of open elements.
 > 		6. If node is not an element in the HTML namespace, return to the step labeled loop.
 > 		7. Otherwise, **process the token according to the rules given in the section corresponding to the current insertion mode in HTML content**.
+> 
 > ([HTML Standard](https://web.archive.org/web/20210622212326/https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign), 強調は引用者による)
 
 色々と書かれているが、かいつまむと、当該閉じタグに対応する「まだ閉じていない要素」が存在しない場合は 7. のステップを踏む。このステップは、「HTML の規則に沿って処理してね」というものである。
@@ -393,6 +416,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 > - An end tag whose tag name is "p"
 > 	- **If the stack of open elements does not have a p element** in button scope, then this is a parse error; **insert an HTML element for a "p" start tag token** with no attributes.  
 > 	  Close a p element.
+> 
 > ([HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#rawtext-less-than-sign-state:~:text=An%20end%20tag%20whose%20tag%20name%20is%20%22p%22), 強調は引用者による)
 
 すなわち、「まだ閉じていない `p` 要素」が存在しない場合、まず (HTML 名前空間の) `p` 要素を挿入してそれをすぐに閉じる、つまり空の `p` 要素が挿入される。
@@ -413,6 +437,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 > 		3. Otherwise, if node is in the special category, then this is a parse error; **ignore the token**, and return.
 > 		4. Set node to the previous entry in the stack of open elements.
 > 		5. Return to the step labeled loop.
+> 
 > ([HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#rawtext-less-than-sign-state:~:text=a%20noscript%20element.-,Any%20other%20end%20tag,-Run%20these%20steps), 強調は引用者による)
 
 「まだ閉じていない `svg` 要素」が無い場合はいずれ 3 に到達し、閉じタグ `</svg>` は無視されるというわけであった。
@@ -530,6 +555,7 @@ if (doc.querySelector('svg p')) {
  `<img src=1 onerror=alert(1)>` が、当然 `img` タグとして解釈され、`onerror` イベントハンドラがセットされる。
 
 パース結果:
+
 - `svg`
 - `p`
 - `style`
@@ -607,6 +633,7 @@ function safelySetInnerHTML2(dangerousHTML) {
 Desanitization とは、サニタイズ結果を加工して使用した結果、無害ではなくなってしまうという脆弱性のパターンである。
 
 > If you sanitize content and then modify it afterwards, you can easily void your security efforts.
+> 
 > ([Cross Site Scripting Prevention - OWASP Cheat Sheet Series](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html#html-sanitization))
 
 HTML サニタイザは DOM ツリーを操作して無害化し、安全な DOM ツリーを構築する。しかしそれをシリアライズしてしまうと、そのパース結果は「安全な DOM ツリー」とは異なるものになる可能性がある。これを踏まえると、「サニタイザが安全と判断した DOM ツリーをシリアライズする行為」は、一種の加工、つまり desanitization によるサニタイズの無効化と捉えることができるのではないか。
@@ -635,5 +662,3 @@ HTML パーサーの自作を始める前は mXSS には手も足も出なかっ
 これが実際に他の mXSS でも活かせるものなのかそうでないのかは、第3弾以降で明らかになるだろう。続編に乞うご期待 2
 
 この記事は、ei-chan さんが企画してくれた社内勉強会に向けて調査・執筆したものである。この機会を作ってくれた ei-chan さん、いつもありがとうございます！
-
-
