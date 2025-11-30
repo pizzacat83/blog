@@ -82,6 +82,26 @@ article {
             width: 100%;
         }
 
+        blockquote {
+            border-left: 4px solid var(--light-gray);
+            padding: 0.5rem 0 0 1rem;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+
+        tr, td {
+            border: 1px solid var(--light-gray);
+            padding: 0.5rem 1rem;
+
+            /* The Markdown processer makes p inside cells, resulting in unwanted margin... */
+            p {
+                margin-bottom: 0;
+            }
+        }
+
         @media (max-width: 600px) {
             code {
                 word-break: break-all;
