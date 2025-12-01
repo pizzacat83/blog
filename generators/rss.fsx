@@ -15,9 +15,14 @@ let renderPost (post: Lib.LocalizedPost) =
     </item>
     """
 
+let postIsMigratedFromOldBlog (post: Lib.LocalizedPost) =
+    // Or we should use frontmatter to mark migrated posts?
+    post.published < System.DateOnly(2025, 3, 1)
+
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
     let posts =
         Lib.getPrimaryLocalizedPosts ctx
+        |> Seq.filter (fun p -> not (postIsMigratedFromOldBlog p))
         |> Seq.sortByDescending (fun p -> p.published)
 
     $"""<?xml version="1.0" encoding="UTF-8" ?>

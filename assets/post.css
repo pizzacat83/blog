@@ -1,5 +1,6 @@
 article {
     max-width: 40rem; /* One line contains 80 characters, you know? */
+    width: 100%; /* Must constrain the width to fit the parent flex, so that just the table overflows */
 
     .anchor {
         margin-left: 0.4rem;
@@ -80,6 +81,29 @@ article {
 
         img {
             width: 100%;
+        }
+
+        blockquote {
+            color: var(--dim-gray);
+            border-left: 4px solid var(--light-gray);
+            padding: 0.5rem 0 0 1rem;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            display: block;
+            overflow-x: auto;
+        }
+
+        tr, td {
+            border: 1px solid var(--light-gray);
+            padding: 0.5rem 1rem;
+
+            /* The Markdown processer makes p inside cells, resulting in unwanted margin... */
+            p {
+                margin-bottom: 0;
+            }
         }
 
         @media (max-width: 600px) {
