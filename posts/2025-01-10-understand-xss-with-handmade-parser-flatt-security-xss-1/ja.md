@@ -125,7 +125,7 @@ Escapable raw text elements の中に含めることができるものは、以�
 >
 > (略)
 >
-> The text in raw text and escapable raw text elements must not contain any occurrences of the string "</" (U+003C LESS-THAN SIGN, U+002F SOLIDUS) followed by characters that case-insensitively match the tag name of the element followed by one of U+0009 CHARACTER TABULATION (tab), U+000A LINE FEED (LF), U+000C FORM FEED (FF), U+000D CARRIAGE RETURN (CR), U+0020 SPACE, U+003E GREATER-THAN SIGN (>), or U+002F SOLIDUS (/).
+> The text in raw text and escapable raw text elements must not contain any occurrences of the string "&lt;/" (U+003C LESS-THAN SIGN, U+002F SOLIDUS) followed by characters that case-insensitively match the tag name of the element followed by one of U+0009 CHARACTER TABULATION (tab), U+000A LINE FEED (LF), U+000C FORM FEED (FF), U+000D CARRIAGE RETURN (CR), U+0020 SPACE, U+003E GREATER-THAN SIGN (&gt;), or U+002F SOLIDUS (/).
 
 一方 normal elements については次のように述べられている。
 > Normal elements can have **text, character references, other elements, and comments**, but the text must not contain the character U+003C LESS-THAN SIGN (<) or an ambiguous ampersand.
@@ -228,7 +228,7 @@ Tokenizer はまず `<` を読み、RCDATA less-than sign state に遷移する�
 
 次に読む文字は `</textarea>` の先頭にある `<` で、また RCDATA less-than sign state に遷移する。`/` を読むと、今度は RCDATA end-tag open state に遷移する。その次に `t` を読み、終了タグのタグ名を認識する状態に遷移する。そして `textarea` の残りの部分を1文字ずつ読み進める。最後に RCDATA end tag name state の状態で、入力文字が `>` であるときの処理は、以下のように定義されている。
 
-> U+003E GREATER-THAN SIGN (>)  
+> U+003E GREATER-THAN SIGN (&gt;)  
 >If the current end tag token is an appropriate end tag token, then switch to the data state and emit the current tag token. Otherwise, treat it as per the "anything else" entry below.
 
 Appropriate end tag token であるとは、今認識している終了タグのタグ名が、直近の開始タグのタグ名と合致していることとして定義されている。今回の場合、直近の開始タグは `<textarea>` であるから、appropriate end tag token とは、まさに textarea の終了タグである。
@@ -269,7 +269,7 @@ Tag open state は `<` の後に来る文字として `!`, `/`, アルファベ�
 
 ここで escapable raw text element の仕様を再掲すると、RCDATA 系の状態遷移系列との対応が見て取れる。
 
-> The text in raw text and escapable raw text elements must not contain any occurrences of the string "</" (U+003C LESS-THAN SIGN, U+002F SOLIDUS) followed by characters that case-insensitively match the tag name of the element followed by one of U+0009 CHARACTER TABULATION (tab), U+000A LINE FEED (LF), U+000C FORM FEED (FF), U+000D CARRIAGE RETURN (CR), U+0020 SPACE, U+003E GREATER-THAN SIGN (>), or U+002F SOLIDUS (/).
+> The text in raw text and escapable raw text elements must not contain any occurrences of the string "&lt;/" (U+003C LESS-THAN SIGN, U+002F SOLIDUS) followed by characters that case-insensitively match the tag name of the element followed by one of U+0009 CHARACTER TABULATION (tab), U+000A LINE FEED (LF), U+000C FORM FEED (FF), U+000D CARRIAGE RETURN (CR), U+0020 SPACE, U+003E GREATER-THAN SIGN (&gt;), or U+002F SOLIDUS (/).
 
 以上で、`<textarea>` に囲まれているかどうかで HTML パーサーがどのような異なる挙動をするのかを、より詳細に理解できた。ところで、そもそも `<textarea>` で囲まれている場合の初期状態がなぜ data state ではなく RCDATA state なのかの説明を飛ばしていたので、ここを明らかにする。
 
