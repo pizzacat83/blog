@@ -9,7 +9,7 @@ head: |
 
 Web 標準に沿って [HTML パーサーをスクラッチ実装](https://github.com/pizzacat83/sabatora/blob/main/saba_core/src/renderer/html.rs)することを通して、パース周りの細かい仕様を活用した XSS テクニックの原理を理解していくシリーズの第2弾。今回は、mutation XSS (mXSS) を利用した DOMPurify < 2.0.1 のバイパス ([CVE-2019-16728](https://nvd.nist.gov/vuln/detail/CVE-2019-16728)・[CVE-2020-6413](https://nvd.nist.gov/vuln/detail/CVE-2020-6413)) を題材とする。HTML パーサーの仕様・実装に基づいてメカニズムを理解していくので、how だけでなく why の理解も深められるだろう。
 
-第1弾: [HTML パーサー自作で理解する Flatt Security XSS Challenge 1](https://pizzacat83.hatenablog.com/entry/2025/01/10/172345) (ここから10ヶ月。ﾋｴｯ)
+第1弾: [HTML パーサー自作で理解する Flatt Security XSS Challenge 1](../2025-01-10-understand-xss-with-handmade-parser-flatt-security-xss-1/) (ここから10ヶ月。ﾋｴｯ)
 
 ちなみに CVE-2019-16728 と CVE-2020-6413 はどちらもいずれも同一の mXSS に対する CVE であり、CVE-2019-16728 は DOMPurify に対するもの、CVE-2020-6413 は Chrome に対するものである。というのも、DOMPurify は HTML のパース・シリアライズを自身で実装せず、ブラウザの API を利用している。そのため、パース・シリアライズの振る舞いに起因するこの mXSS は、DOMPurify と Chrome 両方に対して脆弱性報告がなされた。その結果、HTML Standard における構文解析の仕様を改訂するにまで至った。今回の脆弱性による影響を以下にまとめる。
 
