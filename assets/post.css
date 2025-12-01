@@ -84,6 +84,7 @@ article {
         }
 
         blockquote {
+            color: var(--dim-gray);
             border-left: 4px solid var(--light-gray);
             padding: 0.5rem 0 0 1rem;
         }
