@@ -1,5 +1,6 @@
 article {
     max-width: 40rem; /* One line contains 80 characters, you know? */
+    width: 100%; /* Must constrain the width to fit the parent flex, so that just the table overflows */
 
     .anchor {
         margin-left: 0.4rem;
@@ -90,6 +91,8 @@ article {
         table {
             border-collapse: collapse;
             margin-bottom: 1rem;
+            display: block;
+            overflow-x: auto;
         }
 
         tr, td {
