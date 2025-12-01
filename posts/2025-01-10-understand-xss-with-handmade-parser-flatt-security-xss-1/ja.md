@@ -5,8 +5,6 @@ summary: |
   ところで自作ブラウザの要素の一つとして HTML パーサーをせっかく作ったので、ずっと苦手意識を持っていた mXSS 的な問題の理解を、HTML パーサー自作を通して深めたいと思った。
   去年の11月に公開された Flatt Security XSS Challenge の1問目はまさに、コンテキストの違いによる HTML パースのズレによって DOMPurify によるサニタイズを潜り抜けて XSS をする challenge だった。そこでこの challenge を題材に HTML パースの仕様に deep dive して、パース結果がズレるメカニズムを理解したいと思う。
 head: |
-  <meta property="og:image" content="https://blog.pizzacat83.com/ja/posts/2025-12-01-understand-xss-with-handmade-parser-dompurify-2-0-1/eyecatch.png">
-  <meta name="twitter:card" content="summary_large_image">
   <script type="module" defer>
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
     mermaid.initialize({ startOnLoad: false });
