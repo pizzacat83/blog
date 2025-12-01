@@ -587,6 +587,23 @@ function safelySetInnerHTML(dangerousHTML) {
 
 これは見るからに危険なイベントハンドラ `onerror=alert(1)` を含むため、DOMPurify はこれをしっかり除去してくれる。そのため、上記の問題設定で `innerHTML` に代入されるのは、`onerror` イベントハンドラが除去された無害な HTML である。めでたしめでたし。
 
+では、なぜ閉じタグのうち `</p>` と `</br>` だけにこの振る舞いをさせるのか。おそらくそれは、「閉じタグを書くと開始タグが補完される」という挙動を持つタグがこの2つだけであるためだと思われる。
+
+実際、DevTools コンソールで以下のように色々な要素に対して閉じタグを書き込んでみると、`</p>` と `</br>` の場合にのみ、開始タグが補完されることが確認できる。
+
+```js
+document.body.innerHTML = '</p>'
+console.log(document.body.innerHTML) // <p></p>
+
+document.body.innerHTML = '</br>'
+console.log(document.body.innerHTML) // <br>
+
+document.body.innerHTML = '</div>'
+console.log(document.body.innerHTML) // (空)
+```
+
+「HTML にしか存在しない要素の開始タグが出現したら」だけでなく、その開始タグを生成する能力を持つ閉じタグ `</p>`, `</br>` をも巻き戻しのトリガーとすることで、今回問題となった挙動の不整合を修正する、という考えなのだろうと思う。
+
 ## 教訓を考える
 
 このような DOMPurify バイパスができてしまった本質的な原因を考えてみると、それは以下に尽きると思う。
