@@ -199,7 +199,7 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 
 これは、tokenization stage が出力したトークンをどのように処理するかに関する規定である。
 
-ここで adjusted current node とはほとんどの場合、まだ閉じていないタグのうち最も内側のものを指す。つまり、今 HTML 名前空間の要素の中にいるならば1つ目の規則、それ以外 (SVG 空間の要素も該当) ならば2つ目の規則が適用される。なお、前者の ["the section corresponding to the current insertion mode in HTML content"](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml) は1600行ほどあり、後者の ["the section for parsing tokens in foreign content"](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign) は120行程度であることから、前者の方に魔境の雰囲気が漂う。
+ここで adjusted current node とはほとんどの場合、まだ閉じていないタグのうち最も内側のものを指す。つまり、今 HTML 名前空間の要素の中にいるならば1つ目の規則、それ以外 (SVG 名前空間の要素も該当) ならば2つ目の規則が適用される。なお、前者の ["the section corresponding to the current insertion mode in HTML content"](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhtml) は1600行ほどあり、後者の ["the section for parsing tokens in foreign content"](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign) は120行程度であることから、前者の方に魔境の雰囲気が漂う。
 
 まずは HTML 名前空間の要素の中にいる場合の仕様を見ていこう。構文解析器は 21 種類の「挿入モード (insertion mode)」を遷移しながらトークンを処理していく。挿入モードはたくさんあるが、`<style>` 開始タグが出現した際は大抵色々たらい回しにされたのちに "in head" mode に辿り着くので、ここを読めば良い。(HTML パーサーの実装が手元にある人は、デバッガのステップ実行等で状態遷移の流れも見てみると簡単に流れを追えるだろう。HTML パーサーの実装とは、型推論・コードジャンプ・ステップ実行ができるようになった HTML パーサーの仕様書である (?))
 
@@ -242,7 +242,7 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 > 	- (略)
 > ([HTML Standard](https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign))
 
-なんと、DOM ツリーに `style` 要素を挿入するだけである。字句解析器の状態を変えるような、変わったことは特にしない。HTML パーサーを実装してきた人はみなこう言うだろう。「なんてシンプルなんだ！」
+なんと、DOM ツリーに `style` 要素を挿入するだけである。字句解析器の状態を変えるような、変わったことは特にしない。タグ名に関する条件分岐も、HTML 名前空間の場合と比べると格段に少ない。HTML パーサーを実装してきた人はみなこう言うだろう。「なんてシンプルなんだ！」
 
 ここまでをまとめると、`<style>` が SVG の内外どちらにあるかによって、以下の違いが生じることが分かった。
 
@@ -264,7 +264,7 @@ SVG の内外にある `<style>` は文字列としては同一だが、それ�
 | tag name                        | <code>&nbsp;</code>                    | before attribute name           |                                                                                          | start tag<br>name: `a`                                                                   |                             |
 | before attribute name           | `i`                                    | attribute name                  |                                                                                          | start tag<br>name: `a`                                                                   | reconsume                   |
 | attribute name                  | `i`                                    | attribute name                  |                                                                                          | start tag<br>name: `a`<br>attributes:<br>- `i`                                           |                             |
-| attribute name                  | `d`                                    | attribute name                  |                                                                                          | start tag<br>name: `p`<br>attributes:<br>- `id`                                          |                             |
+| attribute name                  | `d`                                    | attribute name                  |                                                                                          | start tag<br>name: `a`<br>attributes:<br>- `id`                                          |                             |
 | attribute name                  | `=`                                    | before attribute value          |                                                                                          | start tag<br>name: `a`<br>attributes:<br>- `id`                                          |                             |
 | before attribute value          | `"`                                    | attribute value (double-quoted) |                                                                                          | start tag<br>name: `a`<br>attributes:<br>- `id`                                          |                             |
 | attribute value (double-quoted) | `</style><img src=1 onerror=alert(1)>` | attribute value (double-quoted) |                                                                                          | start tag<br>name: `a`<br>attributes:<br>- `id` : `</style><img src=1 onerror=alert(1)>` | どの文字も同じ遷移をするので、この表では1行にまとめた |
