@@ -1,6 +1,6 @@
 ---
 published: 2025-12-01
-summary: Mutation XSS を利用した DOMPurify < 2.0.1 のバイパス (CVE-2019-16728・CVE-2020-6413) のメカニズムを、HTML パーサーの仕様・実装を読み解きながら理解する。How よりも Why に焦点を当てた解説の試み。
+summary: Mutation XSS を利用した DOMPurify < 2.0.1 のバイパス (CVE-2019-16728・CVE-2020-6413) のメカニズムを解剖する。HTML パーサーの仕様・実装を読み解き、「なぜその挙動になるのか」の理解を試みる。
 head: |
   <meta property="og:image" content="https://blog.pizzacat83.com/ja/posts/2025-12-01-understand-xss-with-handmade-parser-dompurify-2-0-1/eyecatch.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -357,7 +357,7 @@ RAWDATA 系の状態では、直近の開始タグ `<style>` に対応する閉�
 	- `p`
 	- \#text: `aaa`
 
-なんと、閉じタグだけを `<svg>` の中に入れると、これまでの結果とは違い、`p` は `svg` 要素の兄弟ではなく子要素となる。このときのメンタルモデルは、「閉じタグ `</p>` は、開始タグを書き忘れた空の`p` 要素とみなされる」というものである。
+なんと、閉じタグだけを `<svg>` の中に入れると、これまでの結果とは違い、`p` は `svg` 要素の兄弟ではなく子要素となる。ここでのパーサーの気持ちは、「閉じタグ `</p>` は、開始タグを書き忘れた空の `p` 要素とみなす」というものである (正確な仕様は後述)。
 
 この DOM ツリーをシリアライズすると、以下の文字列が得られる。
 
