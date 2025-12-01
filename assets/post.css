@@ -1,6 +1,7 @@
 article {
     max-width: 40rem; /* One line contains 80 characters, you know? */
     width: 100%; /* Must constrain the width to fit the parent flex, so that just the table overflows */
+    min-width: 0; /* Somehow this fixes overflow */
 
     .anchor {
         margin-left: 0.4rem;
@@ -93,7 +94,14 @@ article {
             border-collapse: collapse;
             margin-bottom: 1rem;
             display: block;
-            overflow-x: auto;
+            overflow-x: visible;
+        }
+
+        @media (max-width: calc(57 * 16px * 1.2)) { /* article + gap + sidebar */
+            table {
+                display: block;
+                overflow-x: auto;
+            }
         }
 
         tr, td {
@@ -127,14 +135,13 @@ article {
 }
 
 .sidebar {
-    width: 300px;
+    width: 15rem;
     flex-shrink: 0;
     position: sticky;
     top: 1rem;
     align-self: flex-start;
     max-height: calc(100vh - 1rem);
     overflow-y: auto;
-    padding-left: 1rem;
 }
 
 .toc-container {
