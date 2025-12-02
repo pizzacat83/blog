@@ -36,5 +36,6 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
             )
         )
 
-    let doc = XDocument(feed)
+    let doc = XDocument feed
+
     doc.ToString()
