@@ -19,6 +19,11 @@ let postIsMigratedFromOldBlog (post: Lib.LocalizedPost) =
     // Or we should use frontmatter to mark migrated posts?
     post.published < System.DateOnly(2025, 3, 1)
 
+type Utf8StringWriter() =
+    inherit System.IO.StringWriter()
+    
+    override this.Encoding :  System.Text.Encoding = new System.Text.UTF8Encoding(false)
+
 let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
     let posts =
         Lib.getPrimaryLocalizedPosts ctx
@@ -38,4 +43,14 @@ let generate (ctx : SiteContents) (projectRoot: string) (page: string) =
 
     let doc = XDocument feed
 
-    doc.ToString()
+    let buf = new Utf8StringWriter()
+    let xmlWriter = System.Xml.XmlWriter.Create(buf, System.Xml.XmlWriterSettings(
+        Indent = true,
+        OmitXmlDeclaration = false,
+        Encoding = System.Text.Encoding.UTF8
+    ))
+
+    doc.Save xmlWriter
+    xmlWriter.Close()
+
+    buf.ToString()
