@@ -5,7 +5,7 @@ head: |
   <meta property="og:image" content="https://blog.pizzacat83.com/ja/posts/2025-12-25-handmade-tls-1-3-server-in-haskell/tails-logo.png">
   <meta name="twitter:card" content="summary_large_image">
 ---
-# Haskell で TLS 1.3 サーバーを実装している (現在進行形)
+# Haskell で TLS 1.3 サーバーを自作している (現在進行形)
 
 この記事は Haskell Advent Calendar 2025 の第 25 日目の記事です。
 
