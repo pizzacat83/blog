@@ -2,7 +2,7 @@
 published: 2025-12-25
 summary: TLS 1.3 サーバーを、なるべくライブラリに頼らずに Haskell で実装している。まだ完動には至っていないものの、その過程での楽しさを共有したい。
 head: |
-  <meta property="og:image" content="https://blog.pizzacat83.com/ja/posts/2025-12-25-handmade-tls-1-3-server-in-haskell/eyecatch.png">
+  <meta property="og:image" content="https://blog.pizzacat83.com/ja/posts/2025-12-25-handmade-tls-1-3-server-in-haskell/tails-logo.png">
   <meta name="twitter:card" content="summary_large_image">
 ---
 # Haskell で TLS 1.3 サーバーを実装している (現在進行形)
