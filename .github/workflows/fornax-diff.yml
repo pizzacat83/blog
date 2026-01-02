@@ -12,7 +12,7 @@ jobs:
       git-ref: ${{ github.event.pull_request.head.sha }}
       
   build-main:
-    uses: pizzacat83/blog/.github/workflows/fornax-build.yml@diff-action-build # TODO: change to main after testing
+    uses: pizzacat83/blog/.github/workflows/fornax-build.yml@main
     with:
       artifact-name: main
       git-ref: main
