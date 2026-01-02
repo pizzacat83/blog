@@ -1,9 +1,9 @@
 #r "../fornax/src/Fornax.Core/bin/Release/net10.0/Fornax.Core.dll"
-#r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Common.dll"
-#r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Markdown.dll"
+#r "../bin/Release/net10.0/FSharp.Formatting.Common.dll"
+#r "../bin/Release/net10.0/FSharp.Formatting.Markdown.dll"
 #r "../lib/FSharp.Formatting/src/FSharp.Formatting.Markdown2/bin/Release/net10.0/FSharp.Formatting.Markdown2.dll"
-#r "../packages/YamlDotNet/lib/netstandard2.0/YamlDotNet.dll"
-#r "../packages/FsToolkit.ErrorHandling/lib/netstandard2.0/FsToolkit.ErrorHandling.dll"
+#r "../bin/Release/net10.0/YamlDotNet.dll"
+#r "../bin/Release/net10.0/FsToolkit.ErrorHandling.dll"
 
 open System.IO
 open FsToolkit.ErrorHandling
