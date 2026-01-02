@@ -130,12 +130,14 @@ let tfmForRuntime =
   let net5 = NugetVersion(5,0,102, "")
   let net6 = NugetVersion(6,0,102, "")
   let net8 = NugetVersion(8,0,102, "")
+  let net10 = NugetVersion(10,0,100, "")
   fun (sdkVersion: NugetVersion) ->
     match compareNugetVersion sdkVersion netcore31 with
     | 1 | 0 when compareNugetVersion sdkVersion net5 = -1 -> "netcoreapp3.1"
     | 1 | 0 when compareNugetVersion sdkVersion net6 = -1 -> "net6.0"
     | 1 | 0 when compareNugetVersion sdkVersion net8 = -1 -> "net8.0"
-    | 1 | 0 -> "net8.0"
+    | 1 | 0 when compareNugetVersion sdkVersion net10 = -1 -> "net10.0"
+    | 1 | 0 -> "net10.0"
     | _ -> "netcoreapp3.0"
 
 let private maxVersionWithThreshold (minVersion: NugetVersion) (versions: NugetVersion []) =

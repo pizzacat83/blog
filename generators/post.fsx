@@ -1,6 +1,6 @@
-#r "../fornax/src/Fornax.Core/bin/Release/net8.0/Fornax.Core.dll"
+#r "../fornax/src/Fornax.Core/bin/Release/net10.0/Fornax.Core.dll"
 #load "lib.fsx"
-#r "../lib/FSharp.Formatting/src/FSharp.Formatting.Markdown2/bin/Release/net8.0/FSharp.Formatting.Markdown2.dll"
+#r "../lib/FSharp.Formatting/src/FSharp.Formatting.Markdown2/bin/Release/net10.0/FSharp.Formatting.Markdown2.dll"
 
 open Lib
 open System.Net

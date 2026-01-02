@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <DisableImplicitLibraryPacksFolder>true</DisableImplicitLibraryPacksFolder>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="FSharp.Compiler.Service" Version="43.10.101" />
+    <PackageVersion Include="FSharp.Formatting" Version="14.0.1" />
+    <PackageVersion Include="FSharp.Quotations.Evaluator" Version="2.1" />
+    <PackageVersion Include="Argu" Version="6.2.5" />
+    <PackageVersion Include="Suave" Version="2.6.2" />
+    <PackageVersion Include="FsToolkit.ErrorHandling" Version="4.18" />
+    <PackageVersion Include="YamlDotNet" Version="16.3" />
+  </ItemGroup>
+</Project>

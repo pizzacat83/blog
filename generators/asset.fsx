@@ -1,4 +1,4 @@
-#r "../fornax/src/Fornax.Core/bin/Release/net8.0/Fornax.Core.dll"
+#r "../fornax/src/Fornax.Core/bin/Release/net10.0/Fornax.Core.dll"
 
 open System.IO
 

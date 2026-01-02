@@ -1,19 +1,20 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>blog</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="Model.fs" />
+    <ProjectReference Include=".\fornax\src\Fornax.Core\Fornax.Core.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Compiler.Service" />
     <PackageReference Include="FSharp.Formatting" />
     <PackageReference Include="FSharp.Quotations.Evaluator" />
-    <PackageReference Include="Argu" />
-    <PackageReference Include="Suave" />
     <PackageReference Include="FsToolkit.ErrorHandling" />
     <PackageReference Include="YamlDotNet" />
   </ItemGroup>
+
 </Project>

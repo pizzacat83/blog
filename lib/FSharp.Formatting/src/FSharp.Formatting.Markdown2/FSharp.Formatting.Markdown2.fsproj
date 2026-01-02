@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Log.fs" />
@@ -9,5 +9,13 @@
     <Compile Include="HtmlFormatting.fs" />
     <Compile Include="Markdown.fs" />
   </ItemGroup>
-  <Import Project="..\..\..\..\.paket\Paket.Restore.targets" />
+  <ItemGroup>
+    <PackageReference Include="FSharp.Compiler.Service" />
+    <PackageReference Include="FSharp.Formatting" />
+    <PackageReference Include="FSharp.Quotations.Evaluator" />
+    <PackageReference Include="Argu" />
+    <PackageReference Include="Suave" />
+    <PackageReference Include="FsToolkit.ErrorHandling" />
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
 </Project>

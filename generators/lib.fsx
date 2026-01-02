@@ -1,7 +1,7 @@
 #if !FORNAX
 #load "../loaders/postloader.fsx"
 #endif
-#r "../packages/FSharp.Formatting/lib/netstandard2.1/FSharp.Formatting.Markdown.dll"
+#r "../bin/Release/net10.0/FSharp.Formatting.Markdown.dll"
 
 open System.Net
 

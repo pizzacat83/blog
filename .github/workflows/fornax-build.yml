@@ -21,13 +21,12 @@ jobs:
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
-        # with:
-          # cache: true
+        with:
+          cache: true
 
       - name: Build
         run: |
           dotnet tool restore
-          dotnet paket restore
           dotnet build --configuration Release
           dotnet run --configuration Release --project fornax/src/Fornax build
 
