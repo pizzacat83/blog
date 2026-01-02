@@ -27,13 +27,12 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: Build PR branch
         working-directory: pr
         run: |
           dotnet tool restore
-          dotnet paket restore
           dotnet build --configuration Release
           dotnet run --configuration Release --project fornax/src/Fornax build
 
@@ -41,7 +40,6 @@ jobs:
         working-directory: main
         run: |
           dotnet tool restore
-          dotnet paket restore
           dotnet build --configuration Release
           dotnet run --configuration Release --project fornax/src/Fornax build
 
