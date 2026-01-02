@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "dependencies": {
+    "net10.0": {
+      "Argu": {
+        "type": "Direct",
+        "requested": "[6.2.5, )",
+        "resolved": "6.2.5",
+        "contentHash": "68vfXYZCcyTFtC11Z26+S4cSyEPiUJ8PL+iGuYpIbCsH+TN27bIxV/QczHXus/+iSCOfjMJsBffBC90mlzKXrw==",
+        "dependencies": {
+          "FSharp.Core": "6.0.0",
+          "System.Configuration.ConfigurationManager": "4.4.0"
+        }
+      },
+      "FSharp.Compiler.Service": {
+        "type": "Direct",
+        "requested": "[43.10.101, )",
+        "resolved": "43.10.101",
+        "contentHash": "ytaoDt89hebdsy+HBxUr1V5xxjhFmbTqeFyQZLESB3kpSFMDmgTi/sBL2o9KL6RKyL2cirIwkxwaF8eBNa8Q3A==",
+        "dependencies": {
+          "FSharp.Core": "[10.0.101]"
+        }
+      },
+      "FSharp.Formatting": {
+        "type": "Direct",
+        "requested": "[14.0.1, )",
+        "resolved": "14.0.1",
+        "contentHash": "96h+jla7egiSWFIHJFDYLqbKyrHCf8Ky1vQqPeK2GIEFnDBgRbFf4Pcu8CanFelZqhqaZAyYDjaPABy1z6HsiA==",
+        "dependencies": {
+          "FSharp.Compiler.Service": "40.0.0"
+        }
+      },
+      "FSharp.Quotations.Evaluator": {
+        "type": "Direct",
+        "requested": "[2.1.0, )",
+        "resolved": "2.1.0",
+        "contentHash": "UwmbcIw78pNI4h29H6Vk+45Xky7yqzpxOkHIciW/0VhCN95ANVaopD2wajn88hjabgelm7QmPrC41CKFDhHKIA==",
+        "dependencies": {
+          "FSharp.Core": "4.3.1"
+        }
+      },
+      "FsToolkit.ErrorHandling": {
+        "type": "Direct",
+        "requested": "[4.18.0, )",
+        "resolved": "4.18.0",
+        "contentHash": "cGtOP6lWcnLcXiLTGZLHi+8JAyuUDjGhZOmJWnZfd5aPCUIyL+DqUIwmfEGkUk3j/gpcchLDk9BNwUTc1oM30w==",
+        "dependencies": {
+          "FSharp.Core": "7.0.300"
+        }
+      },
+      "Suave": {
+        "type": "Direct",
+        "requested": "[2.6.2, )",
+        "resolved": "2.6.2",
+        "contentHash": "JNTsgb3FrFnvsp7G93Y9XLIGVa47fG4GZ8un/+/iMMVBTRWl8l6Rlnqjo/PsQP6NojtkrLEM4SLz9AhfQIPNag==",
+        "dependencies": {
+          "FSharp.Core": "0.0.0"
+        }
+      },
+      "YamlDotNet": {
+        "type": "Direct",
+        "requested": "[16.3.0, )",
+        "resolved": "16.3.0",
+        "contentHash": "SgMOdxbz8X65z8hraIs6hOEdnkH6hESTAIUa7viEngHOYaH+6q5XJmwr1+yb9vJpNQ19hCQY69xbFsLtXpobQA=="
+      },
+      "FSharp.Core": {
+        "type": "Transitive",
+        "resolved": "10.0.101",
+        "contentHash": "mrS3J7cLtvXM3u3CmiaFq8oyBdlevzZY1VAAAbFk1gUDQtDEjUOybN5XpQglx5wAgJ0wLdDl6OSSfS7ZDFNcpA=="
+      },
+      "System.Configuration.ConfigurationManager": {
+        "type": "Transitive",
+        "resolved": "4.4.0",
+        "contentHash": "gWwQv/Ug1qWJmHCmN17nAbxJYmQBM/E94QxKLksvUiiKB1Ld3Sc/eK1lgmbSjDFxkQhVuayI/cGFZhpBSodLrg==",
+        "dependencies": {
+          "System.Security.Cryptography.ProtectedData": "4.4.0"
+        }
+      },
+      "System.Security.Cryptography.ProtectedData": {
+        "type": "Transitive",
+        "resolved": "4.4.0",
+        "contentHash": "cJV7ScGW7EhatRsjehfvvYVBvtiSMKgN8bOVI0bQhnF5bU7vnHVIsH49Kva7i7GWaWYvmEzkYVk1TC+gZYBEog=="
+      }
+    }
+  }
+}

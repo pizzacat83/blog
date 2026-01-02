@@ -8,12 +8,12 @@
     <Compile Include="Model.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Compiler.Service" Version="43.10.101" />
-    <PackageReference Include="FSharp.Formatting" Version="14.0.1" />
-    <PackageReference Include="FSharp.Quotations.Evaluator" Version="2.1" />
-    <PackageReference Include="Argu" Version="6.2.5" />
-    <PackageReference Include="Suave" Version="2.6.2" />
-    <PackageReference Include="FsToolkit.ErrorHandling" Version="4.18" />
-    <PackageReference Include="YamlDotNet" Version="16.3" />
+    <PackageReference Include="FSharp.Compiler.Service" />
+    <PackageReference Include="FSharp.Formatting" />
+    <PackageReference Include="FSharp.Quotations.Evaluator" />
+    <PackageReference Include="Argu" />
+    <PackageReference Include="Suave" />
+    <PackageReference Include="FsToolkit.ErrorHandling" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 </Project>

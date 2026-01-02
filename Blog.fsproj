@@ -11,10 +11,10 @@
     <ProjectReference Include=".\fornax\src\Fornax.Core\Fornax.Core.fsproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.Formatting" Version="14.0.1" />
-    <PackageReference Include="FSharp.Quotations.Evaluator" Version="2.1" />
-    <PackageReference Include="FsToolkit.ErrorHandling" Version="4.18" />
-    <PackageReference Include="YamlDotNet" Version="16.3" />
+    <PackageReference Include="FSharp.Formatting" />
+    <PackageReference Include="FSharp.Quotations.Evaluator" />
+    <PackageReference Include="FsToolkit.ErrorHandling" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
 
 </Project>
