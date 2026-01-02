@@ -5,7 +5,21 @@ on:
     types: [opened, synchronize]
 
 jobs:
-  build-and-diff:
+  build-pr:
+    uses: ./.github/workflows/fornax-build.yml
+    with:
+      artifact-name: pr
+      git-ref: ${{ github.event.pull_request.head.sha }}
+      
+  build-main:
+    uses: pizzacat83/blog/.github/workflows/fornax-build.yml@main
+    with:
+      artifact-name: main
+      git-ref: main
+
+  diff:
+    needs: [build-pr, build-main]
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -14,63 +28,45 @@ jobs:
       has_diff: ${{ steps.generate-diff.outputs.has_diff }}
       changed_files: ${{ steps.generate-diff.outputs.changed_files }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Download artifacts of PR branch
+        uses: actions/download-artifact@v7
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          name: pr
           path: pr
 
-      - uses: actions/checkout@v4
+      - name: Download artifacts of main branch
+        uses: actions/download-artifact@v7
         with:
-          ref: main
+          name: main
           path: main
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Build PR branch
-        working-directory: pr
-        run: |
-          dotnet tool restore
-          dotnet build --configuration Release
-          dotnet run --configuration Release --project fornax/src/Fornax build
-
-      - name: Build main branch
-        working-directory: main
-        run: |
-          dotnet tool restore
-          dotnet build --configuration Release
-          dotnet run --configuration Release --project fornax/src/Fornax build
-
       - name: Format HTML files
         run: |
           npm install -g prettier
-          npx prettier --print-width 99999 --write "pr/_public/**/*.html"
-          npx prettier --print-width 99999 --write "main/_public/**/*.html"
+          npx prettier --print-width 99999 --write "pr/**/*.html"
+          npx prettier --print-width 99999 --write "main/**/*.html"
 
       - name: Generate diff
         id: generate-diff
         run: |
           {
             echo 'diff<<EOFab7b817fb4182540ae557d44cba7f584'
-            diff --ignore-space-change -r main/_public pr/_public || true
+            diff --ignore-space-change -r main pr || true
             echo EOFab7b817fb4182540ae557d44cba7f584
           } >> "$GITHUB_OUTPUT"
           {
             echo 'changed_files<<EOFab7b817fb4182540ae557d44cba7f584'
-            diff --ignore-space-change -qr main/_public pr/_public || true
+            diff --ignore-space-change -qr main pr || true
             echo EOFab7b817fb4182540ae557d44cba7f584
           } >> "$GITHUB_OUTPUT"
 
-            if diff --ignore-space-change -qr main/_public pr/_public > /dev/null; then
+            if diff --ignore-space-change -qr main pr > /dev/null; then
             echo "has_diff=false" >> "$GITHUB_OUTPUT"
           else
             echo "has_diff=true" >> "$GITHUB_OUTPUT"
           fi
 
   post-comment:
-    needs: build-and-diff
+    needs: diff
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -85,7 +81,7 @@ jobs:
 
       - name: Update or create comment
         uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
-        if: ${{ needs.build-and-diff.outputs.has_diff == 'true' }}
+        if: ${{ needs.diff.outputs.has_diff == 'true' }}
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
@@ -94,13 +90,13 @@ jobs:
             ## Build Diff
 
             Changed files:
-            ${{ needs.build-and-diff.outputs.changed_files }}
+            ${{ needs.diff.outputs.changed_files }}
             
             <details>
               <summary>build diff</summary>
 
             ```diff
-            ${{ needs.build-and-diff.outputs.diff }}
+            ${{ needs.diff.outputs.diff }}
             ```
 
             </details>
@@ -110,7 +106,7 @@ jobs:
 
       - name: Update or create comment (no diff)
         uses: peter-evans/create-or-update-comment@dec9d02d7ba794da3485751abf67551b0724c66b
-        if: ${{ needs.build-and-diff.outputs.has_diff == 'false' }}
+        if: ${{ needs.diff.outputs.has_diff == 'false' }}
         with:
           comment-id: ${{ steps.find-comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
