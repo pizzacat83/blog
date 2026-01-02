@@ -12,6 +12,7 @@ open Suave.Sockets.Control
 open Suave.WebSocket
 open System.Reflection
 open Logger
+open Suave.Writers
 
 type FornaxExiter () =
     interface IExiter with
@@ -101,13 +102,23 @@ let ws (webSocket : WebSocket) (context: HttpContext) =
     }
 
 let getWebServerConfig port =
+    let mimeTypes =
+        defaultMimeTypesMap @@
+            (function
+            | ".webp" -> createMimeType "image/webp" false
+            | _ -> None
+            )
+
+    let webServerConfig =
+        { defaultConfig with mimeTypesMap = mimeTypes }
+        
     match port with
     | Some port ->
-        { defaultConfig with
+        { webServerConfig with
             bindings =
                 [ HttpBinding.create Protocol.HTTP Net.IPAddress.Loopback port ] }
     | None ->
-        defaultConfig
+        webServerConfig
 
 let router basePath =
     let pubdir = Path.Combine(basePath, "_public")
@@ -208,8 +219,13 @@ let main argv =
             0
         | Some Version -> 
             let assy = Assembly.GetExecutingAssembly()
-            let v = assy.GetCustomAttributes<AssemblyVersionAttribute>() |> Seq.head
-            printfn "%s" v.Version
+            let version = 
+                 assy.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                 |> Option.ofObj
+                 |> Option.map _.InformationalVersion
+                 |> Option.defaultValue (assy.GetName().Version.ToString())
+
+            printfn "%s" version
             0
         | Some Clean ->
             let publ = Path.Combine(cwd, "_public")
