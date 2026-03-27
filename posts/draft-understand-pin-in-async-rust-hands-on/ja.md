@@ -61,4 +61,11 @@ pub trait Future {
 }
 ```
 
+`Future` には `poll` というメソッドがあり、これは `Poll<Self::Output>` というものを返すようです。
+
+> `fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>`
+> Attempts to resolve the future to a final value, registering the current task for wakeup if the value is not yet available.
+
+では `Poll<Self::Output>` とはなんでしょうか。
+
 ## Pin は何ではないか
